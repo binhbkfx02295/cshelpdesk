@@ -81,7 +81,6 @@ public class MasterDataCache {
         updateOpeningTickets();
         updateAllMessages();
         updateAllTicketCriterias();
-        log.info("caching successfully");
     }
 
     public void updateAllTicketCriterias() {
@@ -114,7 +113,6 @@ public class MasterDataCache {
             Timestamp endOfDay = Timestamp.valueOf(endDateTime);
             List<Ticket> result = ticketRepository.findOpeningOrToday(startOfDay, endOfDay);
             openingTickets = result.stream().collect(Collectors.toMap(Ticket::getId, Function.identity()));
-            log.info("Updated opening tickets cache successfully");
         } catch (Exception e) {
             log.error("Error while updating opening tickets", e);
         }
@@ -241,7 +239,7 @@ public class MasterDataCache {
         try {
             this.openingTickets.put(saved.getId(), saved);
         } catch (Exception e) {
-            log.error(Arrays.toString(e.getStackTrace()));
+            log.error("Error message", e);
         }
     }
 
@@ -249,7 +247,7 @@ public class MasterDataCache {
         try {
             this.messages.put(saved.getId(), saved);
         } catch (Exception e) {
-            log.error(Arrays.toString(e.getStackTrace()));
+            log.error("Error message", e);
         }
     }
 

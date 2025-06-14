@@ -26,25 +26,17 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        log.info("interceptor here");
-        log.info("check accessor {}", accessor.toString());
         if (accessor != null && SimpMessageType.CONNECT.equals(accessor.getMessageType())) {
 
             Principal principal = accessor.getUser();
             if (principal == null) {
                 throw new IllegalStateException("Unauthenticated WebSocket connection attempt");
             }
-            log.info(principal.toString());
-            // Log & expose authorities if available
             if (principal instanceof Authentication auth) {
                 Set<String> roles = auth.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toSet());
-                log.info("WebSocket CONNECT by {} with roles {}", auth.getName(), roles);
-            } else {
-                log.info("WebSocket CONNECT by {}", principal.getName());
             }
-            // Principal is already set; no extra work needed.
         }
         return message;
     }

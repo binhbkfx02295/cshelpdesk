@@ -39,7 +39,6 @@ public class TicketController {
 
     @PostMapping
     public ResponseEntity<APIResultSet<TicketDetailDTO>> create(@RequestBody TicketDetailDTO dto) {
-        log.info(dto.toString());
         return APIResponseEntityHelper.from(ticketService.createTicket(dto));
     }
 
@@ -73,14 +72,12 @@ public class TicketController {
     public ResponseEntity<APIResultSet<PaginationResponse<TicketListDTO>>> search(
             @ModelAttribute TicketSearchCriteria criteria,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        log.info(pageable.toString());
         return APIResponseEntityHelper.from(ticketService.searchTickets(criteria, pageable));
     }
 
     @GetMapping(value = "/search-report")
     public ResponseEntity<APIResultSet<PaginationResponse<TicketListDTO>>> search(
             @ModelAttribute TicketSearchCriteria criteria) {
-        log.info(criteria.toString());
         return APIResponseEntityHelper.from(ticketService.searchTickets(criteria, Pageable.unpaged()));
     }
 

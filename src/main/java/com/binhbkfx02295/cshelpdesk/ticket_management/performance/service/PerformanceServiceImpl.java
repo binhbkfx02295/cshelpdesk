@@ -100,10 +100,9 @@ public class PerformanceServiceImpl implements PerformanceService {
         try {
             result = APIResultSet.ok("Tạo report thành công", report);
         } catch (Exception e) {
-            log.error("Loi khong the tao Performance Report", e);
+            log.error("Error message", e);
             result = APIResultSet.internalError();
         }
-        log.info(result.getMessage());
         return result;
     }
 
@@ -227,10 +226,9 @@ public class PerformanceServiceImpl implements PerformanceService {
             }
             result = APIResultSet.ok("Đánh giá tickets thành công", null);
         } catch (Exception e) {
-            log.error("", e);
+            log.error("Error message", e);
             result = APIResultSet.internalError();
         }
-        log.info(result.getMessage());
         return result;
 
     }
@@ -299,7 +297,7 @@ public class PerformanceServiceImpl implements PerformanceService {
                     .map(ticketAssessment -> APIResultSet.ok("Tìm ticket thành công", ticketAssessmentMapper.toDetailDTO(ticketAssessment)))
                     .orElseGet(() -> APIResultSet.badRequest("Không tìm thấy ticket"));
         } catch (Exception e) {
-            log.error("", e);
+            log.error("Error message", e);
             result = APIResultSet.internalError();
         }
         return result;
@@ -317,7 +315,7 @@ public class PerformanceServiceImpl implements PerformanceService {
                     })
                     .orElseGet(() -> APIResultSet.badRequest("Không tìm thấy ticket"));
         } catch (Exception e) {
-            log.error("", e);
+            log.error("Error message", e);
             result = APIResultSet.internalError();
         }
         return result;

@@ -57,12 +57,6 @@ public class MainController {
         return "setting";
     }
 
-
-    @GetMapping("/user-group")
-    public String userGroup() {
-        return "user-group";
-    }
-
     @GetMapping("/error")
     public String error(HttpServletResponse res, HttpServletRequest req) throws IOException {
 

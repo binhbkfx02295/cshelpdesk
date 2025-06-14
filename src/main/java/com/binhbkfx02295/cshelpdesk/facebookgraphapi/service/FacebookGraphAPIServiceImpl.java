@@ -33,8 +33,6 @@ public class FacebookGraphAPIServiceImpl implements FacebookGraphAPIService {
 
     @Override
     public FacebookToken saveShortLivedToken(String shortLivedToken) {
-        log.info("👉 Đang gửi yêu cầu đổi token ngắn hạn sang token dài hạn...");
-
         String url = String.format("https://graph.facebook.com/oauth/access_token"
                         + "?grant_type=fb_exchange_token"
                         + "&client_id=%s"
@@ -56,14 +54,11 @@ public class FacebookGraphAPIServiceImpl implements FacebookGraphAPIService {
         token.setLongLivedAccessToken(response.getAccessToken());
         token.setLastUpdated(LocalDateTime.now());
         token.setExpiresAt(LocalDateTime.now().plusSeconds(response.getExpiresIn()));
-
-        log.info("✅ Token dài hạn đã được tạo và lưu thành công.");
         return tokenRepository.save(token);
     }
 
     @Override
     public String getValidAccessToken() {
-        log.info("🔍 Đang kiểm tra token hợp lệ cho Page ID: {}", facebookApiProperties.getPageId());
         FacebookToken token;
         Optional<FacebookToken> optionalToken =
                 tokenRepository.findFirstByPageIdOrderByLastUpdatedDesc(facebookApiProperties.getPageId());
@@ -83,20 +78,16 @@ public class FacebookGraphAPIServiceImpl implements FacebookGraphAPIService {
         LocalDateTime expiresAt = token.getExpiresAt();
 
         if (expiresAt.isBefore(now) || expiresAt.isEqual(now)) {
-            log.warn("⚠️ Token đã hết hạn. Đang làm mới token...");
             return saveShortLivedToken(token.getLongLivedAccessToken()).getLongLivedAccessToken();
         } else if (Duration.between(now, expiresAt).toDays() <= 3) {
-            log.warn("⚠️ Token sắp hết hạn trong {} ngày. Đang làm mới token...", Duration.between(now, expiresAt).toDays());
             return saveShortLivedToken(token.getLongLivedAccessToken()).getLongLivedAccessToken();
         } else {
-            log.info("✅ Token hiện tại vẫn còn hiệu lực. Còn {} ngày đến hạn.", Duration.between(now, expiresAt).toDays());
             return token.getLongLivedAccessToken();
         }
     }
 
     @Override
     public FacebookUserProfileDTO getUserProfile(String userId) {
-        log.info("📥 Đang lấy thông tin người dùng Facebook với ID: {}", userId);
 
         String token = getValidAccessToken();
         String url = buildProfileUrl(userId, token);
@@ -104,22 +95,24 @@ public class FacebookGraphAPIServiceImpl implements FacebookGraphAPIService {
         try {
             return restTemplate.getForObject(url, FacebookUserProfileDTO.class);
         } catch (Exception e) {
-            log.warn("⚠️ Gặp lỗi khi gọi API lấy profile: {}", e.getMessage());
             if (e.getMessage().contains("code\":190")) {
-                log.info("🔄 Token có thể đã hết hạn. Đang làm mới token và thử lại...");
                 String newToken = saveShortLivedToken(token).getLongLivedAccessToken();
                 String retryUrl = buildProfileUrl(userId, newToken);
                 return restTemplate.getForObject(retryUrl, FacebookUserProfileDTO.class);
             }
-            log.error("❌ Lỗi không xử lý được khi lấy profile từ Facebook", e);
-            return null;
+            FacebookUserProfileDTO facebookUserProfileDTO = new FacebookUserProfileDTO();
+            facebookUserProfileDTO.setId(userId);
+            FacebookUserProfileDTO.Picture picture = new FacebookUserProfileDTO.Picture();
+            FacebookUserProfileDTO.Picture.Data data = new FacebookUserProfileDTO.Picture.Data();
+            data.setUrl("/img/profile-placeholder.jpg");
+            picture.setData(data);
+            facebookUserProfileDTO.setPicture(picture);
+            return facebookUserProfileDTO;
         }
     }
 
     @Override
     public void notifyNoAssignee(String senderId) {
-        log.info("🔔 Đang gửi thông báo cho khách hàng (senderId={}): không có nhân viên hỗ trợ.", senderId);
-
         String token = getValidAccessToken();
         String url = String.format("https://graph.facebook.com/v19.0/me/messages?access_token=%s", token);
 
@@ -142,7 +135,6 @@ public class FacebookGraphAPIServiceImpl implements FacebookGraphAPIService {
             HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
 
             String response = restTemplate.postForObject(url, request, String.class);
-            log.info("✅ Đã gửi thông báo cho khách hàng thành công. Response: {}", response);
         } catch (Exception e) {
             log.error("❌ Gửi thông báo cho khách hàng thất bại", e);
         }

@@ -1,8 +1,6 @@
 package com.binhbkfx02295.cshelpdesk.webhook.controller;
 
-import com.binhbkfx02295.cshelpdesk.facebookgraphapi.service.FacebookGraphAPIService;
 import com.binhbkfx02295.cshelpdesk.webhook.dto.WebHookEventDTO;
-import com.binhbkfx02295.cshelpdesk.webhook.service.WebHookService;
 import com.binhbkfx02295.cshelpdesk.webhook.service.WebHookServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,10 +39,8 @@ public class WebHookController {
             HttpServletRequest request) throws IOException {
         String rawBody = new BufferedReader(new InputStreamReader(request.getInputStream()))
                 .lines().collect(Collectors.joining("\n"));
-        log.info("[Webhook] Raw body:\n{}", rawBody);
 
         WebHookEventDTO event = new ObjectMapper().readValue(rawBody, WebHookEventDTO.class);
-        log.info("[Webhook] Raw payload received: {}", event);
         webhookService.handleWebhook(event);
 
         return ResponseEntity.ok("EVENT_RECEIVED");

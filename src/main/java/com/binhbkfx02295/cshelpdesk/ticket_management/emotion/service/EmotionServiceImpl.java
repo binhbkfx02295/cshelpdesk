@@ -23,12 +23,10 @@ public class EmotionServiceImpl implements EmotionService{
     @Override
     public APIResultSet<List<EmotionDTO>> getAllEmotion() {
         try {
-            APIResultSet<List<EmotionDTO>> result = APIResultSet.ok("Lay all emotions thanh cong", cache.getAllEmotions().values()
+            return APIResultSet.ok("Lay all emotions thanh cong", cache.getAllEmotions().values()
                     .stream().map(mapper::toDTO).toList());
-            log.info(result.getMessage());
-            return result;
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error("Error message", e);
             return APIResultSet.internalError();
         }
     }

@@ -34,10 +34,9 @@ public class UserGroupServiceImpl implements UserGroupService {
             group.setPermissions(groupDTO.getPermissions().stream().map(permissionMapper::toEntity).collect(Collectors.toSet()));
             group.setDescription(groupDTO.getDescription());
             UserGroup saved = userGroupRepository.save(group);
-            log.info("✅ Đã tạo nhóm quyền: {}", saved.getName());
             return APIResultSet.ok("Tạo nhóm thành công", mapper.toDTO(saved));
         } catch (Exception e) {
-            log.error("❌ Lỗi khi tạo nhóm quyền: {}", e.getMessage(), e);
+            log.error("Error message ", e);
             return APIResultSet.internalError("Tạo nhóm quyền thất bại: " + e.getMessage());
         }
     }
@@ -55,13 +54,10 @@ public class UserGroupServiceImpl implements UserGroupService {
             group.setDescription(groupDTO.getDescription());
 
             UserGroup updated = userGroupRepository.save(group);
-            log.info("✅ Cập nhật nhóm quyền ID {} thành công", groupId);
             return APIResultSet.ok("Cập nhật nhóm thành công", mapper.toDTO(updated));
         } catch (NoSuchElementException e) {
-            log.warn("⚠️ Không tìm thấy nhóm quyền ID {} để cập nhật", groupId);
             return APIResultSet.notFound(e.getMessage());
         } catch (Exception e) {
-            log.error("❌ Lỗi khi cập nhật nhóm quyền ID {}: {}", groupId, e.getMessage(), e);
             return APIResultSet.internalError("Cập nhật nhóm thất bại: " + e.getMessage());
         }
     }
@@ -73,7 +69,6 @@ public class UserGroupServiceImpl implements UserGroupService {
             Optional<UserGroup> optional = userGroupRepository.findById(id);
 
             if (optional.isEmpty()) {
-                log.warn("⚠️ Không tìm thấy nhóm quyền ID {} để xoá", groupId);
                 return APIResultSet.notFound("Không tìm thấy nhóm để xoá");
             }
 
@@ -83,12 +78,9 @@ public class UserGroupServiceImpl implements UserGroupService {
             }
             employeeRepository.saveAll(usersInGroup);
             userGroupRepository.deleteById(id);
-
-            log.info("🗑️ Đã xoá nhóm quyền ID {} và gỡ liên kết khỏi {} người dùng", groupId, usersInGroup.size());
             return APIResultSet.ok("Xoá nhóm và gỡ liên kết người dùng thành công", null);
 
         } catch (Exception e) {
-            log.error("❌ Lỗi khi xoá nhóm quyền ID {}: {}", groupId, e.getMessage(), e);
             return APIResultSet.internalError("Lỗi khi xoá nhóm: " + e.getMessage());
         }
     }
@@ -101,7 +93,6 @@ public class UserGroupServiceImpl implements UserGroupService {
                     .orElseThrow(() -> new NoSuchElementException("Không tìm thấy nhóm quyền với ID: " + groupId));
             return APIResultSet.ok("Lấy nhóm thành công", mapper.toDTO(group));
         } catch (NoSuchElementException e) {
-            log.warn("⚠️ Nhóm quyền ID {} không tồn tại", groupId);
             return APIResultSet.notFound(e.getMessage());
         }
     }
@@ -115,7 +106,6 @@ public class UserGroupServiceImpl implements UserGroupService {
             log.error("❌ Lỗi khi lấy danh sách nhóm quyền: {}", e.getMessage(), e);
             result = APIResultSet.internalError("Không thể lấy danh sách nhóm quyền");
         }
-        log.info(result.getMessage());
         return result;
     }
 }

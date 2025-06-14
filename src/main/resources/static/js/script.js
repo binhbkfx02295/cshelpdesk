@@ -239,7 +239,11 @@ function initCustomer() {
     //bind click open modal
     button.addEventListener("click", function () {
       window.customerDeleteModal.show();
-      confirmBtn.removeEventListener("click", deleteCustomerHandler);
+
+      if (deleteCustomerHandler) {
+            confirmBtn.removeEventListener("click", deleteCustomerHandler);
+        }
+
       deleteCustomerHandler = function () {
         //get array of ids
         const checkboxes = document.querySelectorAll("input[type=checkbox]");
@@ -252,8 +256,8 @@ function initCustomer() {
             }
           }
         })
-        console.log("arr ", arr);
-        openAPIxhr(HTTP_DELETE_METHOD, `${API_FACEBOOK_USER}/delete-all`, function () {
+        openAPIxhr(HTTP_DELETE_METHOD, `${API_FACEBOOK_USER}/delete-all`, function (response) {
+          successToast(response.message);
           window.customerDeleteModal.hide();
           setTimeout(function () {
             checkboxes.forEach(checkbox => {
@@ -419,8 +423,10 @@ function initCustomer() {
         zalo: document.getElementById("zalo").value
       }
       openAPIxhr(HTTP_PUT_METHOD, `${API_FACEBOOK_USER}`, function (response) {
+        successToast(response.message);
         window.customerViewDetailModal.hide();
         setTimeout(function () {
+
           openCustomerViewDetailModal(data.facebookId);
           cancelBtn.click();
         }, 500);
@@ -614,7 +620,7 @@ function initCustomer() {
     console.log(id);
     const container = document.querySelector("#customerDetailModal .detail-info");
     openAPIxhr(HTTP_GET_METHOD, `${API_FACEBOOK_USER}?id=${id}`, function (response) {
-      console.log("ok..");
+      successToast(response.message);
       populateCustomerEditModal(response, container);
     })
 
@@ -688,6 +694,9 @@ function initCustomer() {
       handleResponse(xhr, function (response) {
         successToast(response.message);
         window.customerDeleteModal.hide();
+
+        //remove item khoi view;
+        document.querySelector(`[data-id="${id}"`).remove();
       })
       xhr.open(HTTP_DELETE_METHOD, `${API_FACEBOOK_USER}?id=${id}`)
       xhr.send();
@@ -753,8 +762,6 @@ function initTicket() {
   initTicketCreate();
   imgGalleryModal();
   initTicketDetailModal();
-
-  performTicketSearch(0, 10);
 
 }
 
@@ -1483,20 +1490,20 @@ function initTicketCreate() {
       ? { username: $("#create_assignee").attr("data-username") } : null;
 
     const facebookUser = $("#create_facebookuser").val() ?
-      { id: $("#create_facebookuser").val() } : null
+      { facebookId: $("#create_facebookuser").val() } : null
 
 
-    const category = $("#create_category").attr("data-category-code") ?
-      { code: $("#create_category").attr("data-category-code") } : null
+    const category = $("#create_category").attr("data-category-id") ?
+      { id: $("#create_category").attr("data-category-id") } : null
 
-    const progressStatus = $("#create_progress-status").attr("data-progress-code") ?
-      { code: $("#create_progress-status").attr("data-progress-code") } : null
+    const progressStatus = $("#create_progress-status").attr("data-progress-id") ?
+      { id: $("#create_progress-status").attr("data-progress-id") } : null
 
-    const emotion = $("#create_emotion").attr("data-emotion-code") ?
-      { code: $("#create_emotion").attr("data-emotion-code") } : null
+    const emotion = $("#create_emotion").attr("data-emotion-id") ?
+      { id: $("#create_emotion").attr("data-emotion-id") } : null
 
-    const satisfaction = $("#create-satisfaction").attr("data-satisfaction-code") ?
-      { code: $("#create-satisfaction").attr("data-satisfaction-code") } : null
+    const satisfaction = $("#create-satisfaction").attr("data-satisfaction-id") ?
+      { id: $("#create-satisfaction").attr("data-satisfaction-id") } : null
 
     const ticketData = {
       title: $("#create_title").val(),
@@ -1941,7 +1948,6 @@ function loadTicketDetail(ticketId) {
   $('[data-bs-toggle="tooltip"]').tooltip?.();
 }
 function loadTicketSearch(page = null, pageSize = null) {
-
   const container = document.getElementById("ticket-list-body");
   const data = getTicketSearchData(page, pageSize);
   const url = `${API_TICKET}/search?${buildQueryParam(data)}`;
@@ -1955,9 +1961,16 @@ function loadTicketSearch(page = null, pageSize = null) {
       performTicketSearch);
     successToast(response.message);
   }
+  errorCallback = function(response) {
+    if (response.httpCode == 404) {
+      errorToast(response.message);
+      container.innerHTML = "";
+      container.append(renderNoResultElement());
+    }
+  }
 
   // call API search
-  openAPIxhr(HTTP_GET_METHOD, url, callback);
+  openAPIxhr(HTTP_GET_METHOD, url, callback, errorCallback);
 
 }
 
@@ -1989,7 +2002,7 @@ function getTicketSearchData(page, size) {
     toTime: toTimestampLocal($("#toDate").val()),
     category: $("#ticket-search #category").attr("data-category-id") || null,
     emotion: $("#ticket-search #emotion").attr("data-emotion-id") || null,
-    satisfaction: $("#ticket-search #satisfaction").attr("satisfaction") || null,
+    satisfaction: $("#ticket-search #satisfaction").attr("data-satisfaction-id") || null,
     page: page,
     size: size,
     sort: "createdAt,DESC"
@@ -2426,7 +2439,7 @@ function renderMessageItem(msg) {
 }
 
 function openImgModal(imgElement) {
-  const gallery = imgElement.parentElement;
+  const gallery = imgElement.closest(".message-attachments");
   const allImgs = Array.from(gallery.querySelectorAll(".type-image"));
   currentGalleryImages = allImgs.map(img => img.src);
   currentGalleryIndex = allImgs.indexOf(imgElement);
@@ -3389,11 +3402,11 @@ function initPerformance() {
       })
       return tr;
     }, function () {
-      const div = document.createElement("div");
-      div.innerHTML = `
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
         <td colspan="999"><div class="text-center text-secondary py-3">Hiện chưa có ticket lỗi</div></td>
       `
-      return div.innerHTML;
+      return tr;
     })
 
   }

@@ -4,6 +4,7 @@ import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.*;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.StatusLog;
 import com.binhbkfx02295.cshelpdesk.employee_management.usergroup.UserGroupMapper;
+import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ public class EmployeeMapper {
 
     private final StatusLogMapper statusLogMapper;
     private final UserGroupMapper userGroupMapper;
+    private final MasterDataCache cache;
 
     public EmployeeDTO toDTO(Employee employee) {
         EmployeeDTO dto = new EmployeeDTO();
@@ -82,4 +84,34 @@ public class EmployeeMapper {
         dto.setCreatedAt(Timestamp.from(entity.getCreatedAt()));
         return dto;
     }
+
+    public void mergeToUser(Employee user, EmployeeDTO employeeDTO) {
+        user.setActive(employeeDTO.isActive());
+
+        if (employeeDTO.getUserGroup() != null && user.getUserGroup() != null && employeeDTO.getUserGroup().getGroupId() !=
+                user.getUserGroup().getGroupId()) {
+            user.setUserGroup(cache.getUserGroup(employeeDTO.getUserGroup().getGroupId()));
+        }
+
+        if (employeeDTO.getName() != null && !employeeDTO.getName().equalsIgnoreCase(user.getName())) {
+            user.setName(employeeDTO.getName());
+        }
+
+        if (employeeDTO.getDescription() != null && !employeeDTO.getDescription().equalsIgnoreCase(user.getDescription())) {
+            user.setDescription(employeeDTO.getDescription());
+        }
+
+        if (employeeDTO.getEmail() != null && !employeeDTO.getEmail().equalsIgnoreCase(user.getEmail())) {
+            user.setEmail(employeeDTO.getEmail());
+        }
+
+        if (employeeDTO.getPhone() != null && !employeeDTO.getPhone().equalsIgnoreCase(user.getPhone())) {
+            user.setPhone(employeeDTO.getPhone());
+        }
+
+        if (employeeDTO.getStatusLogs() != null && !employeeDTO.getStatusLogs().isEmpty()) {
+            user.getStatusLogs().add(statusLogMapper.toEntity(employeeDTO.getStatusLogs().get(0)));
+        }
+    }
+
 }

@@ -23,13 +23,11 @@ public class SatisfactionServiceImpl implements SatisfactionService {
     @Override
     public APIResultSet<List<SatisfactionDTO>> getAllSatisfaction() {
         try {
-            APIResultSet<List<SatisfactionDTO>> result = APIResultSet.ok("Lay tat ca Muc hai long thanh cong",
+            return APIResultSet.ok("Lay tat ca Muc hai long thanh cong",
                     cache.getAllSatisfactions().values().stream().map(mapper::toDTO).toList());
-            log.info(result.getMessage());
-            return result;
 
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error("Error message", e);
             return APIResultSet.internalError();
         }
     }

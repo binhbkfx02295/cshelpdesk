@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 
@@ -20,117 +19,97 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 public class FacebookUserServiceImpl implements FacebookUserService {
+
     private final FacebookUserRepository facebookUserRepository;
     private final FacebookUserMapper mapper;
 
     @Override
     public APIResultSet<FacebookUserDetailDTO> save(FacebookUserDetailDTO userDTO) {
+        APIResultSet<FacebookUserDetailDTO> result;
         try {
             FacebookUser user = facebookUserRepository.save(mapper.toEntity(userDTO));
             if (user.getCreatedAt() == null) {
                 user.setCreatedAt(Instant.now());
             }
-            APIResultSet<FacebookUserDetailDTO> result = APIResultSet.ok(MSG_SUCCESS, mapper.toDetailDTO(user));
-            log.info(result.getMessage());
-            return result;
+            result = APIResultSet.ok(MSG_SUCCESS_CREATE_FACEBOOK_USER, mapper.toDetailDTO(user));
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return APIResultSet.internalError(e.getMessage());
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
-    }
-
-    @Override
-    public APIResultSet<FacebookUserDetailDTO> save(FacebookUserFetchDTO userDTO) {
-        try {
-            FacebookUser user = facebookUserRepository.save(mapper.toEntity(userDTO));
-
-            if (user.getCreatedAt() == null) {
-                user.setCreatedAt(Instant.now());
-            }
-            APIResultSet<FacebookUserDetailDTO> result = APIResultSet.ok(MSG_SUCCESS, mapper.toDetailDTO(user));
-            log.info(result.getMessage());
-            return result;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return APIResultSet.internalError(e.getMessage());
-        }
+        return result;
     }
 
     @Override
     public APIResultSet<FacebookUserDetailDTO> save(FacebookUserProfileDTO userDTO) {
+        APIResultSet<FacebookUserDetailDTO> result;
         try {
             FacebookUser user = facebookUserRepository.save(mapper.toEntity(userDTO));
 
             if (user.getCreatedAt() == null) {
                 user.setCreatedAt(Instant.now());
             }
-            APIResultSet<FacebookUserDetailDTO> result = APIResultSet.ok(MSG_SUCCESS, mapper.toDetailDTO(user));
-            log.info(result.getMessage());
-            return result;
+            result = APIResultSet.ok(MSG_SUCCESS_CREATE_FACEBOOK_USER, mapper.toDetailDTO(user));
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return APIResultSet.internalError(e.getMessage());
+            log.error("Error message", e);
+            result = APIResultSet.internalError(e.getMessage());
         }
+
+        return result;
     }
 
     @Override
     public APIResultSet<FacebookUserDetailDTO> update(FacebookUserDetailDTO updatedUserDTO) {
+        APIResultSet<FacebookUserDetailDTO> result;
         try {
-            FacebookUser entity = facebookUserRepository.get(updatedUserDTO.getFacebookId());
-
-            return Optional.ofNullable(facebookUserRepository.update(mapper.toEntity(updatedUserDTO)))
-                    .map(user -> {
-                        APIResultSet<FacebookUserDetailDTO> result = APIResultSet.ok(String.format("Cập nhật khách hàng ID: %s thành công.", updatedUserDTO.getFacebookId()), mapper.toDetailDTO(user));
-                        log.info(result.getMessage());
-                        return result;
-                    })
-                    .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_USER_NOT_FOUND));
+            result = Optional.ofNullable(facebookUserRepository.update(mapper.toEntity(updatedUserDTO)))
+                    .map(user ->
+                       APIResultSet.ok("Cập nhật thông tin khách hàng thành công.", mapper.toDetailDTO(user)))
+                    .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_FACEBOOK_USER_NOT_EXISTS));
         } catch (Exception e) {
-            e.printStackTrace();
-            log.info(String.valueOf(e));
-            return APIResultSet.internalError(MSG_ERROR_INTERNAL_SERVER_ERROR);
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
     public APIResultSet<FacebookUserDetailDTO> get(String id) {
+        APIResultSet<FacebookUserDetailDTO> result;
         try {
-            return Optional.ofNullable(facebookUserRepository.get(id))
-                    .map(user -> {
-                        APIResultSet<FacebookUserDetailDTO> result = APIResultSet.ok(MSG_SUCCESS, mapper.toDetailDTO(user));
-                        log.info(result.getMessage());
-                        return result;
-                    })
-                    .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_USER_NOT_FOUND));
+            result = Optional.ofNullable(facebookUserRepository.get(id))
+                    .map(user -> APIResultSet.ok("Truy vấn khách hàng thành công", mapper.toDetailDTO(user)))
+                    .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_FACEBOOK_USER_NOT_EXISTS));
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return APIResultSet.internalError(MSG_ERROR_INTERNAL_SERVER_ERROR);
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
     public APIResultSet<List<FacebookUserListDTO>> getAll() {
+        APIResultSet<List<FacebookUserListDTO>> result;
         try {
-            return Optional.ofNullable(facebookUserRepository.getAll())
-                    .map(users -> APIResultSet.ok(MSG_SUCCESS, users.stream().map(mapper::toListDTO).toList()))
-                    .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_SEARCH_NOT_FOUND));
+            result = Optional.ofNullable(facebookUserRepository.getAll())
+                    .map(users -> APIResultSet.ok(MSG_SUCCESS_GET_ALL_FACEBOOK_USER, users.stream().map(mapper::toListDTO).toList()))
+                    .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_GET_ALL_FACEBOOK_USER));
 
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return APIResultSet.internalError(e.getMessage());
+            log.error("Error message", e);
+            result = APIResultSet.internalError(e.getMessage());
         }
+        return result;
     }
 
     @Override
     public APIResultSet<Void> existsById(String facebookId) {
         try {
             if (facebookUserRepository.existsById(facebookId))
-                return APIResultSet.ok("Facebook User có tồn tại", null);
-            log.info("Facebook User không ton tai");
-            return APIResultSet.notFound("Facebook User không tồn tại");
+                return APIResultSet.ok("Khách hàng có tồn tại", null);
+            return APIResultSet.notFound(MSG_ERROR_FACEBOOK_USER_NOT_EXISTS);
         } catch (Exception e) {
-            log.error("Lỗi không thể kiểm tra facebook user tồn tại ", e);
-            return APIResultSet.notFound("Lỗi không thể kiểm tra facebook user tồn tại");
+            log.error("Error message", e);
+            return APIResultSet.notFound();
         }
     }
 
@@ -138,27 +117,22 @@ public class FacebookUserServiceImpl implements FacebookUserService {
     public APIResultSet<Void> deleteById(String s) {
         try {
             if (s == null || s.isEmpty() || s.isBlank()) {
-                APIResultSet<Void> result = APIResultSet.badRequest("Facebook ID bị thiếu");
-                log.info(result.getMessage());
-                return result;
+                return APIResultSet.badRequest(MSG_ERROR_VALIDATE_FACEBOOK_USER);
             }
-
             if (!facebookUserRepository.existsById(s)) {
-                APIResultSet<Void> result = APIResultSet.badRequest(("Facebook ID không tồn tại"));
-                log.info(result.getMessage());
-                return result;
+                return APIResultSet.badRequest(MSG_ERROR_FACEBOOK_USER_NOT_EXISTS);
             }
             facebookUserRepository.deleteById(s);
-            log.info("Xóa Khách hàng ID: {} thành công.", s);
-            return APIResultSet.ok(String.format("Xóa Khách hàng ID: %s thành công.", s), null);
+            return APIResultSet.ok(MSG_SUCCESS_DELETE_FACEBOOK_USER, null);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error message", e);
             return APIResultSet.internalError();
         }
     }
 
     @Override
     public APIResultSet<PaginationResponse<FacebookUserDetailDTO>> searchUsers(FacebookUserSearchCriteria criteria, Pageable pageable) {
+        APIResultSet<PaginationResponse<FacebookUserDetailDTO>> result;
         try {
             Map<String, Object> queryResult = facebookUserRepository.search(criteria, pageable);
             List<FacebookUserDetailDTO> content = ((List<FacebookUser>)queryResult.get("content")).stream().map(mapper::toDetailDTO).toList();
@@ -168,23 +142,23 @@ public class FacebookUserServiceImpl implements FacebookUserService {
             response.setPage(pageable.getPageNumber());
             response.setSize(pageable.getPageSize());
             response.setTotalPages((int) Math.ceil((double) response.getTotalElements() / response.getSize()));
-            return APIResultSet.ok("search facebook user thanh cong", response);
+            result = APIResultSet.ok(MSG_SUCCESS_GET_ALL_FACEBOOK_USERS, response);
         } catch (Exception e) {
-            log.info(Arrays.toString(e.getStackTrace()));
-            return APIResultSet.internalError();
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
     public APIResultSet<Void> deleteAll(ArrayList<String> ids) {
         try {
             facebookUserRepository.deleteAll(ids);
-            APIResultSet<Void> result = APIResultSet.ok("Xoa nhom id thanh cong", null);
-            log.info(result.getMessage());
+            APIResultSet<Void> result = APIResultSet.ok(MSG_ERROR_DELETE_FACEBOOK_USERS, null);
             return result;
         } catch (Exception e) {
-            log.info(Arrays.toString(e.getStackTrace()));
-            return APIResultSet.internalError("Loi Xoa nhom id");
+            log.error("Error message", e);
+            return APIResultSet.internalError();
         }
     }
 
@@ -193,12 +167,14 @@ public class FacebookUserServiceImpl implements FacebookUserService {
     public List<FacebookUserExportDTO> exportSearchUsers(FacebookUserSearchCriteria criteria, Pageable pageable) {
         try {
             Map<String, Object> queryResult = facebookUserRepository.search(criteria, pageable);
-            List<FacebookUserExportDTO> content = ((List<FacebookUser>)queryResult.get("content")).stream().map(mapper::toExportDTO).toList();
-            return content;
+            if (queryResult.get("content") != null) {
+                List<FacebookUserExportDTO> content = ((List<FacebookUser>)queryResult.get("content")).stream().map(mapper::toExportDTO).toList();
+                return content;
+            }
         } catch (Exception e) {
-            log.info(Arrays.toString(e.getStackTrace()));
-            return null;
+            log.error("Error message", e);
         }
+        return null;
     }
 
 

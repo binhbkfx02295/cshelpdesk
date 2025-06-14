@@ -5,20 +5,12 @@ import com.binhbkfx02295.cshelpdesk.openai.common.PromptBuilder;
 import com.binhbkfx02295.cshelpdesk.openai.dto.OpenAIResponse;
 import com.binhbkfx02295.cshelpdesk.openai.model.TicketEvaluateResult;
 import com.binhbkfx02295.cshelpdesk.ticket_management.performance.dto.PerformanceSummaryDTO;
-import com.binhbkfx02295.cshelpdesk.ticket_management.performance.model.TicketAssessment;
-import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.TicketReportDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import com.binhbkfx02295.cshelpdesk.message.entity.Message;
-import com.binhbkfx02295.cshelpdesk.openai.config.ModelRegistryConfig;
 import com.binhbkfx02295.cshelpdesk.openai.model.ModelSettings;
 import com.binhbkfx02295.cshelpdesk.openai.model.GPTResult;
 import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
@@ -47,13 +39,9 @@ public abstract class BaseGPTModelAdapter implements GPTModelAdapter {
 
     public GPTResult analyze(List<Message> messages) {
         ModelSettings config = getModelSettings();
-        log.info(config.toString());
         String prompt = buildPrompt(messages);
-        log.info(prompt);
         OpenAIResponse openAIResponse = getOpenAIResponse(config, prompt);
-        GPTResult result = extractGPTResult(openAIResponse, config);
-        log.info(result.toString());
-        return result;
+        return extractGPTResult(openAIResponse, config);
     }
 
     private OpenAIResponse getOpenAIResponse(ModelSettings config, String prompt) {
@@ -65,23 +53,14 @@ public abstract class BaseGPTModelAdapter implements GPTModelAdapter {
     public TicketEvaluateResult evaluateTicketByBatch(Map<String, Object> object) {
         String prompt = promptBuilder.buildBatchEvaluateTicket(object);
         TicketEvaluateResult result = new TicketEvaluateResult();
-        log.info(prompt);
-        System.out.println(prompt);
-        //TODO: build requestJson
         String requestJson = buildRequestJson(getModelSettings(), prompt);
-        log.info("request json {}", requestJson);
-        //TODO: callOpenAI
         String rawResponse = callOpenAI(getModelSettings(), requestJson);
-
-        log.info("rawResponse {}", rawResponse);
         OpenAIResponse openAIResponse = parseOpenAIResponse(rawResponse);
-        log.info("ket qua {}", openAIResponse.toString());
-        log.info("ket qua string {}", openAIResponse.getChoices().get(0).getMessage().getContent());
         try {
             List<TicketEvaluateResult.EvaluatedTicket> parseResult = objectMapper.readValue(openAIResponse.getChoices().get(0).getMessage().getContent(), new TypeReference<List<TicketEvaluateResult.EvaluatedTicket>>() {});
             result.setResult(parseResult);
         } catch (Exception e) {
-            log.info("Loi parse json tu ket qua chatGPT", e);
+            log.error("Error message", e);
         }
 
         return result;
@@ -134,7 +113,7 @@ public abstract class BaseGPTModelAdapter implements GPTModelAdapter {
             );
             return objectMapper.writeValueAsString(body);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error message", e);
             throw new RuntimeException("Error building request JSON", e);
         }
     }
@@ -150,7 +129,7 @@ public abstract class BaseGPTModelAdapter implements GPTModelAdapter {
                     "https://api.openai.com/v1/chat/completions", entity, String.class);
             return response.getBody();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error message", e);
             return null;
         }
     }

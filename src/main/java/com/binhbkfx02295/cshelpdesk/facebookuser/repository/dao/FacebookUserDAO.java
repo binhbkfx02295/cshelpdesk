@@ -9,23 +9,23 @@ import java.util.Map;
 
 public interface FacebookUserDAO {
 
-    FacebookUser save(FacebookUser user);
+    FacebookUser save(FacebookUser user) throws RuntimeException;
 
-    FacebookUser get(String id);
+    FacebookUser get(String id) throws RuntimeException;
 
-    List<FacebookUser> search(String fullName);
+    List<FacebookUser> search(String fullName) throws RuntimeException;
 
-    Map<String, Object> search(FacebookUserSearchCriteria criteria, Pageable page);
+    Map<String, Object> search(FacebookUserSearchCriteria criteria, Pageable page) throws RuntimeException;
 
-    List<FacebookUser> getAll();
+    List<FacebookUser> getAll() throws RuntimeException;
 
-    FacebookUser update(FacebookUser updatedUser);
+    FacebookUser update(FacebookUser updatedUser) throws RuntimeException;
 
-    boolean existsById(String id);
+    boolean existsById(String id) throws RuntimeException;
 
-    void deleteById(String facebookUserId);
+    void deleteById(String facebookUserId) throws RuntimeException;
 
-    void deleteAll(List<String> ids);
+    void deleteAll(List<String> ids) throws RuntimeException;
 
-    FacebookUser getReferenceById(String facebookId);
+    FacebookUser getReferenceById(String facebookId) throws RuntimeException;
 }

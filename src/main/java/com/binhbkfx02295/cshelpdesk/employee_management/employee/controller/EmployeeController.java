@@ -64,7 +64,6 @@ public class EmployeeController {
     public ResponseEntity<APIResultSet<EmployeeDetailDTO>> updateUser(
             @RequestBody EmployeeDTO dto
     ) {
-        log.info("update user: {}", dto);
         return APIResponseEntityHelper.from(employeeService.updateUser(dto.getUsername(), dto));
     }
 
@@ -72,16 +71,10 @@ public class EmployeeController {
     public ResponseEntity<APIResultSet<Void>> changePassword(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestBody ChangePasswordDTO changePasswordDTO) {
-        try {
-            return APIResponseEntityHelper.from(employeeService.changePassword(
-                    user.getUsername(),
-                    changePasswordDTO.getPassword(),
-                    changePasswordDTO.getNewPassword()));
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return APIResponseEntityHelper.from(APIResultSet.internalError());
-        }
-
+        return APIResponseEntityHelper.from(employeeService.changePassword(
+                user.getUsername(),
+                changePasswordDTO.getPassword(),
+                changePasswordDTO.getNewPassword()));
     }
 
     @GetMapping("/me/online-status")
@@ -116,7 +109,6 @@ public class EmployeeController {
     public ResponseEntity<APIResultSet<Void>> deleteUser(
             @RequestBody EmployeeDTO employeeDTO
     ) {
-        log.info("delete user {}", employeeDTO);
         return APIResponseEntityHelper.from(employeeService.deleteByUsername(employeeDTO.getUsername()));
     }
 

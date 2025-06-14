@@ -34,7 +34,6 @@ public class ReportServiceImpl implements ReportService {
             );
 
             if (!resultSet.isSuccess()) {
-                log.warn("Failed to fetch ticket data: {}", resultSet.getMessage());
                 return APIResultSet.internalError("Không thể tạo báo cáo: " + resultSet.getMessage());
             }
 
@@ -67,7 +66,6 @@ public class ReportServiceImpl implements ReportService {
             );
 
             if (!resultSet.isSuccess()) {
-                log.warn("Failed to fetch ticket data: {}", resultSet.getMessage());
                 result = APIResultSet.internalError("Không thể tạo báo cáo: " + resultSet.getMessage());
             } else {
                 Report report = toWeekdayReport(resultSet.getData(), fromDate, toDate, type, label, main, zone);
@@ -79,8 +77,6 @@ public class ReportServiceImpl implements ReportService {
             log.error("Lỗi khi tạo báo cáo Week day", e);
             result = APIResultSet.internalError("Lỗi hệ thống khi tạo báo cáo Week day");
         }
-
-        log.info(result.getMessage());
         return result;
     }
 
@@ -110,7 +106,6 @@ public class ReportServiceImpl implements ReportService {
             log.error("Lỗi khi tạo báo cáo Day in Month", e);
             result = APIResultSet.internalError("Lỗi hệ thống khi tạo báo cáo Day in Month");
         }
-        log.info(result.getMessage());
         return result;
     }
 

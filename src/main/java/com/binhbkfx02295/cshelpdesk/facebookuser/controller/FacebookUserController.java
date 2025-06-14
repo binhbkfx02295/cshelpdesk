@@ -56,7 +56,6 @@ public class FacebookUserController {
 
     @PostMapping
     public ResponseEntity<APIResultSet<FacebookUserDetailDTO>> createFacebookUser(@RequestBody FacebookUserDetailDTO user) {
-        log.info(user.toString());
         APIResultSet<FacebookUserDetailDTO> resultSet = facebookUserService.save(user);
         return ResponseEntity.status(resultSet.getHttpCode()).body(resultSet);
     }
@@ -64,7 +63,6 @@ public class FacebookUserController {
 
     @PutMapping()
     public ResponseEntity<APIResultSet<FacebookUserDetailDTO>> updateFacebookUser(@RequestBody FacebookUserDetailDTO user) {
-        log.info(user.toString());
         return APIResponseEntityHelper.from(facebookUserService.update(user));
     }
 
@@ -72,7 +70,6 @@ public class FacebookUserController {
     public ResponseEntity<APIResultSet<PaginationResponse<FacebookUserDetailDTO>>> searchFacebookUser(
             @ModelAttribute FacebookUserSearchCriteria criteria,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        log.info(criteria.toString());
         APIResultSet<PaginationResponse<FacebookUserDetailDTO>> resultSet = facebookUserService.searchUsers(criteria, pageable);
         return APIResponseEntityHelper.from(resultSet);
     }
@@ -85,8 +82,6 @@ public class FacebookUserController {
     @GetMapping("/export-excel")
     public ResponseEntity<InputStreamResource> exportExcel(
             @ModelAttribute FacebookUserSearchCriteria criteria) {
-        // Lấy tất cả dữ liệu, không phân trang
-        log.info(criteria.toString());
         List<FacebookUserExportDTO> result = facebookUserService.exportSearchUsers(criteria, Pageable.unpaged());
         if (result == null) {
             return ResponseEntity.internalServerError().build();

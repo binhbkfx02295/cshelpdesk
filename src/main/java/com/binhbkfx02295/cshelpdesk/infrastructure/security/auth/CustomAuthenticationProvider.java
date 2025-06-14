@@ -31,33 +31,24 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         String username = authentication.getName();
         String rawPassword = authentication.getCredentials().toString();
-        log.info("⏺️ Bắt đầu xác thực: {}", username);
-        log.info(rawPassword);
         LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
         loginRequestDTO.setUsername(username);
         loginRequestDTO.setPassword(rawPassword);
 
         APIResultSet<LoginResponseDTO> result = authenticationService.login(loginRequestDTO);
         if (!result.isSuccess()) {
-            log.warn("❌ Xác thực thất bại với mã HTTP {} - {}", result.getHttpCode(), result.getMessage());
-
             if (result.getHttpCode() == 400 || result.getHttpCode() == 401) {
-                log.info("throw new BadCredentialsException(result.getMessage());");
                 throw new BadCredentialsException(result.getMessage());
             } else if (result.getHttpCode() == 403) {
-                log.info("throw new LockedException(result.getMessage());");
                 throw new LockedException(result.getMessage());
             }
         }
 
         LoginResponseDTO response = result.getData();
-        // Tạo danh sách quyền (authorities)
         Set<GrantedAuthority> authorities = response.getEmployeeDTO().getUserGroup().getPermissions().stream()
                 .map(p -> new SimpleGrantedAuthority(p.getName()))
                 .collect(Collectors.toSet());
         authorities.add(new SimpleGrantedAuthority("ROLE_" + response.getEmployeeDTO().getUserGroup().getCode().toUpperCase()));
-        log.info("✅ Xác thực thành công: {}", username);
-        log.info(authorities.toString());
         UserPrincipal principal = UserPrincipal.builder()
                 .username(response.getEmployeeDTO().getUsername())
                 .fullName(response.getEmployeeDTO().getName())

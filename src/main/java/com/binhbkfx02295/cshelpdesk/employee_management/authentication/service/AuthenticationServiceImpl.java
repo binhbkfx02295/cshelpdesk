@@ -44,62 +44,41 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public APIResultSet<LoginResponseDTO> login(LoginRequestDTO request) {
         LoginResponseDTO response;
-        //TODO: 1. validate LoginRequestDTO
         ValidationResult validation = validate(request, locale);
         if (validation.hasErrors()) {
             response = new LoginResponseDTO();
             response.setValidationResult(validation);
             return APIResultSet.badRequest(messageSource.getMessage("auth.input.invalid", null, locale), response);
         }
-
-
-        //TODO: 2. find User
         Optional<Employee> employeeOpt = employeeRepository.findWithUserGroupAndPermissionsByUsername(request.getUsername());
         if (employeeOpt.isEmpty()) {
             return APIResultSet.badRequest(messageSource.getMessage("auth.invalid.credentials", null, locale));
         }
-
-
         Employee employee = employeeOpt.get();
 
-        //TODO: 3a. tk bị khóa
         if (!employee.isActive()) {
             return APIResultSet.forbidden(messageSource.getMessage("auth.account.locked", null, locale));
         }
-        log.info("đang đăng nhập ...");
-        //TODO: 3b. tk sai pass
         if (!passwordEncoder.matches(request.getPassword(), employee.getPassword())) {
-
             int failCount = employee.getFailedLoginCount() + 1;
             employee.setFailedLoginCount(failCount);
-
-
             if (failCount >= 5) {
                 employee.setActive(false);
-
             }
-
             employeeRepository.save(employee);
             return APIResultSet.unauthorized(messageSource.getMessage("auth.invalid.credentials.remaining", new Object[]{5 - failCount}, locale));
 
         }
-
-        //TODO: 4. Đăng nhập thành công → reset đếm sai
         employee.setFailedLoginCount(0);
-
-        //TODO: 5. Chuẩn bị LoginResponseDTO
         response = new LoginResponseDTO();
-
         EmployeeDTO employeeDTO = employeeMapper.toDTO(employee);
         response.setEmployeeDTO(employeeDTO);
-        //TODO: 6: nếu có sẵn status log thì không lưu nữa;
         statusLogRepository.findFirstByEmployee_UsernameOrderByTimestampDesc( employee.getUsername()).ifPresentOrElse(
                 statusLog -> {
 
             if (statusLog.getStatus().getId() != 1) {
                 StatusLog newLog = new StatusLog();
                 Status status = cache.getStatus(1);
-                log.info("status: {}", status.getName());
                 newLog.setStatus(status);
                 newLog.setEmployee(employee);
                 employee.getStatusLogs().add(newLog);
@@ -113,7 +92,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             employee.getStatusLogs().add(newLog);
         });
-        log.info(String.format("Login: saved new status log for %s", employee.getUsername()));
         employeeRepository.save(employee);
         entityManager.flush();
         entityManager.clear();
@@ -125,7 +103,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public APIResultSet<Void> logout(EmployeeDTO employeeDTO) {
         String username = employeeDTO.getUsername();
-        log.info("finding logss for {}", username);
         Optional<Employee> employeeOpt = employeeRepository.findWithAllStatusLog(employeeDTO.getUsername());
 
         if (employeeOpt.isPresent()) {
@@ -139,7 +116,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 newLog.setEmployee(employee);
                 employee.getStatusLogs().add(newLog);
                 employeeRepository.saveAndFlush(employee);
-                log.info(String.format("%s log new status: %s", employeeDTO.getUsername(), status.getName()));
                 entityManager.flush();
                 entityManager.clear();
                 //TODO: phong event
@@ -149,8 +125,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         employeeMapper.toDTO(cache.getEmployee(employee.getUsername()))));
             }
         }
-        log.info(String.format("%s logout success ", employeeDTO.getUsername()));
-
         return APIResultSet.ok(messageSource.getMessage("auth.logout.success", null, locale), null);
     }
 

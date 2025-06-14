@@ -66,7 +66,6 @@ public class WebHookServiceImpl implements WebHookService {
                         }
                         messageDTO = convertToMessageDTO(messaging);
                         messageDTO.setSenderSystem(ticket.getAssignee() == null);
-                        log.info("test isSenderSystem? ticket.getAssignee() == null: {} ,isSenderSystem: {}", ticket.getAssignee() == null, messageDTO.isSenderSystem());
                         messageDTO.setTicketId(ticket.getId());
                         messageService.addMessage(messageDTO);
                     }
@@ -88,26 +87,19 @@ public class WebHookServiceImpl implements WebHookService {
                         ticket.setFacebookUser(facebookUserMapper.toDTO(facebookUser));
 
                         if (!autoAssign(ticket)) {
-                            log.info("assign failed, now inform customer");
                             facebookGraphAPIService.notifyNoAssignee(senderId);
                         }
 
                         ticket = ticketService.createTicket(ticket).getData();
                     }
-
-
-
                     messageDTO = convertToMessageDTO(messaging);
                     messageDTO.setTicketId(ticket.getId());
                     messageDTO.setSenderSystem(false);
                     messageService.addMessage(messageDTO);
 
                     if (ticket.getAssignee() == null) {
-                        log.info("assign failed, now inform customer");
                         facebookGraphAPIService.notifyNoAssignee(senderId);
                     }
-
-
                 }
             }
         }
@@ -156,7 +148,6 @@ public class WebHookServiceImpl implements WebHookService {
         }).toList();
 
         if (employeeList.isEmpty()) {
-            log.info("no online employee");
             return false;
         }
 
@@ -174,9 +165,7 @@ public class WebHookServiceImpl implements WebHookService {
                 least = employee;
             }
         }
-
         ticket.setAssignee(employeeMapper.toDTO(least));
-        log.info("Ticket: auto assigned OK, username: {}", least.getUsername());
         return true;
     }
 }

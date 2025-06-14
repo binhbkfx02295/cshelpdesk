@@ -34,6 +34,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public APIResultSet<MessageDTO> addMessage(MessageDTO messageDTO) {
+        APIResultSet<MessageDTO> result;
         try {
             Message saved = messageRepository.save(mapper.toEntity(messageDTO));
             entityManager.flush();
@@ -42,14 +43,16 @@ public class MessageServiceImpl implements MessageService {
             cache.getTicket(messageDTO.getTicketId()).getMessages().add(saved);
             //TODO: publish event
             publisher.publishEvent(new MessageEvent(mapper.toEventDTO(cache.getMessage(saved.getId()))));
-            return APIResultSet.ok("Message added successfully", mapper.toDTO(cache.getMessage(saved.getId())));
+            result = APIResultSet.ok(MSG_ADD_MESSAGE_SUCCESS, mapper.toDTO(cache.getMessage(saved.getId())));
         } catch (Exception e) {
-            return APIResultSet.internalError("Failed to save message: " + e.getMessage());
+            result = APIResultSet.internalError(MSG_ADD_MESSAGE_FAILED + e.getMessage());
         }
+        return result;
     }
 
     @Override
     public APIResultSet<List<MessageDTO>> getMessagesByTicketId(int ticketId) {
+        APIResultSet<List<MessageDTO>> result;
         try {
             Ticket openingTicket = cache.getTicket(ticketId);
             List<Message> messages;
@@ -64,10 +67,11 @@ public class MessageServiceImpl implements MessageService {
             List<MessageDTO> dtos = messages.stream()
                     .map(mapper::toDTO)
                     .collect(Collectors.toList());
-            return APIResultSet.ok("Messages retrieved successfully", dtos);
+            result =  APIResultSet.ok(MSG_RETRIEVE_MESSAGES_OK, dtos);
         } catch (Exception e) {
-            return APIResultSet.internalError("Failed to retrieve messages: " + e.getMessage());
+            result =  APIResultSet.internalError(MSG_RETRIEVE_MESSAGES_FAILED);
         }
+        return result;
     }
 
     public List<Message> toEntity(List<MessageDTO> dtos) {

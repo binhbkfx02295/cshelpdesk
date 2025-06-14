@@ -74,7 +74,6 @@ public class MasterDataSeeder implements CommandLineRunner {
 //        seedTickets(6720);
 //        seedConversations(20);
         seedTicketCriterias();
-        log.info("seeding done");
         cache.refresh();
     }
 
@@ -243,7 +242,6 @@ public class MasterDataSeeder implements CommandLineRunner {
         tickets.forEach((ticket) -> {
             List<Message> result = messageRepository.findByTicket_Id(ticket.getId());
             if (!result.isEmpty()) {
-                log.info("seed message cho ticket #{}: ticket da co message", ticket.getId());
                 return;
             }
             List<Message> temp = new ArrayList<>();
@@ -257,11 +255,9 @@ public class MasterDataSeeder implements CommandLineRunner {
                 int interval = 6 + random.nextInt(115); // 6..120
                 currentTime += interval * 1000L;
                 msg.setTimestamp(new Timestamp(currentTime));
-//                messageRepository.save(msg);
                 temp.add(msg);
             }
             messageRepository.saveAll(temp);
-            log.info("seed message cho ticket #{}: thanh cong", ticket.getId());
         });
 
     }
@@ -465,7 +461,6 @@ public class MasterDataSeeder implements CommandLineRunner {
 
 
             boolean result = facebookUserRepository.existsById(user.getFacebookId());
-            log.info("seeding user {}", result);
             if (!result) {
                 facebookUserRepository.save(user);
             }
@@ -484,7 +479,6 @@ public class MasterDataSeeder implements CommandLineRunner {
                 cache.getAllCategories().values().stream().toList();
         List<ProgressStatus> progressStatusList = cache.getAllProgress().isEmpty() ? progressStatusRepository.findAll() :
                 cache.getAllProgress().values().stream().toList();
-        log.info("employee List: {}", employeeList.size());
         List<Ticket> temp = new ArrayList<>();
         for (int i = 0; i < num - ticketList.size(); i++) {
             Faker faker = new Faker(new Locale("vi")); // Vietnamese locale

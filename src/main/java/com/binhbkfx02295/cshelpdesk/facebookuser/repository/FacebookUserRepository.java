@@ -28,12 +28,11 @@ public class FacebookUserRepository implements FacebookUserDAO {
     }
 
     @Override
-    public FacebookUser save(FacebookUser user) {
+    public FacebookUser save(FacebookUser user) throws RuntimeException{
         try {
             entityManager.persist(user);
             return user;
         } catch (Exception e) {
-            log.error("Failed to persist FacebookUser: {}", user, e);
             throw new RuntimeException("Failed to save FacebookUser", e);
         }
     }
@@ -43,7 +42,6 @@ public class FacebookUserRepository implements FacebookUserDAO {
         try {
             return entityManager.find(FacebookUser.class, id);
         } catch (Exception e) {
-            log.error("Error getting FacebookUser with id={}", id, e);
             throw new RuntimeException("Failed to get FacebookUser", e);
         }
     }
@@ -57,7 +55,6 @@ public class FacebookUserRepository implements FacebookUserDAO {
                     .setParameter("name", fullName)
                     .getResultList();
         } catch (Exception e) {
-            log.error("Error searching FacebookUser with name={}", fullName, e);
             throw new RuntimeException("Failed to search FacebookUsers", e);
         }
     }
@@ -65,9 +62,6 @@ public class FacebookUserRepository implements FacebookUserDAO {
     @Override
     public Map<String, Object> search(FacebookUserSearchCriteria criteria, Pageable pageable) {
         try {
-            //TODO: create query that use LIMIT ?, ?
-            //TODO: set ? ? with pageable
-            //TODO: for every field in criteria, set typed parameter to WHERE condition
             StringBuilder queryBuilder = new StringBuilder("SELECT f FROM FacebookUser f WHERE 1=1");
             StringBuilder countQueryBuilder = new StringBuilder("SELECT COUNT(f) FROM FacebookUser f WHERE 1=1");
 
@@ -135,7 +129,6 @@ public class FacebookUserRepository implements FacebookUserDAO {
             resultMap.put("totalElements", totalElements);
             return resultMap;
         } catch (Exception e) {
-            log.error("Error searching FacebookUser", e);
             throw new RuntimeException("Failed to search FacebookUsers", e);
         }
     }
@@ -174,7 +167,6 @@ public class FacebookUserRepository implements FacebookUserDAO {
 
             return existing;
         } catch (Exception e) {
-            log.error("Error updating FacebookUser: {}", updatedUser, e);
             throw new RuntimeException("Failed to update FacebookUser", e);
         }
     }
@@ -184,7 +176,6 @@ public class FacebookUserRepository implements FacebookUserDAO {
         try {
             return entityManager.find(FacebookUser.class, id) != null;
         } catch (Exception e) {
-            log.error("Error checking existence of FacebookUser with id={}", id, e);
             throw new RuntimeException("Failed to check existence", e);
         }
     }
@@ -195,17 +186,14 @@ public class FacebookUserRepository implements FacebookUserDAO {
             FacebookUser entity = entityManager.find(FacebookUser.class, facebookUserId);
             if (entity != null) {
                 entityManager.remove(entity);
-            } else {
-                log.warn("FacebookUser not found with id: {}", facebookUserId);
             }
         } catch (Exception e) {
-            log.error("Delete FacebookUser failed {}", e.getMessage(), e);
             throw new RuntimeException("Delete FacebookUser failed", e);
         }
     }
 
     @Override
-    public void deleteAll(List<String> ids) {
+    public void deleteAll(List<String> ids){
         try {
             if (ids == null || ids.isEmpty()) return;
             for (String id : ids) {
@@ -219,8 +207,7 @@ public class FacebookUserRepository implements FacebookUserDAO {
                     .setParameter("ids", ids)
                     .executeUpdate();
         } catch (Exception e){
-            log.error("Loi delete all facebookId", e);
-            e.printStackTrace();
+            throw new RuntimeException("Delete All FacebookUser failed", e);
         }
     }
 
@@ -230,8 +217,7 @@ public class FacebookUserRepository implements FacebookUserDAO {
             return entityManager.getReference(FacebookUser.class, facebookId);
         } catch (Exception e){
             log.error("Loi get reference by id", e);
-            e.printStackTrace();
+            throw new RuntimeException("Find by reference failed", e);
         }
-        return null;
     }
 }

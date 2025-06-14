@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 @Data
 @NoArgsConstructor
 public class FacebookUserMapper {
+
+    public static final String DEFAULT_FACEBOOK_NAME = "Người dùng Facebook";
+
     public FacebookUserListDTO toListDTO(FacebookUser entity) {
         FacebookUserListDTO dto = new FacebookUserListDTO();
         dto.setFacebookId(entity.getFacebookId());
@@ -51,13 +54,18 @@ public class FacebookUserMapper {
         entity.setFacebookId(dto.getFacebookId());
         entity.setFacebookName(dto.getFacebookName());
         entity.setFacebookProfilePic(dto.getFacebookProfilePic());
+
         return entity;
     }
 
     public FacebookUser toEntity(FacebookUserFetchDTO dto) {
         FacebookUser entity = new FacebookUser();
         entity.setFacebookId(dto.getFacebookId());
-        entity.setFacebookName(String.format("%s %s", dto.getFacebookFirstName(), dto.getFacebookLastName()));
+        if (dto.getFacebookFirstName() != null && dto.getFacebookLastName() != null) {
+            entity.setFacebookName(String.format("%s %s", dto.getFacebookFirstName(), dto.getFacebookLastName()));
+        } else {
+            entity.setFacebookName(DEFAULT_FACEBOOK_NAME);
+        }
         entity.setFacebookProfilePic(dto.getFacebookProfilePic());
         return entity;
     }
@@ -85,7 +93,11 @@ public class FacebookUserMapper {
     public FacebookUser toEntity(FacebookUserProfileDTO dto) {
         FacebookUser entity = new FacebookUser();
         entity.setFacebookId(dto.getId());
-        entity.setFacebookName(String.format("%s %s", dto.getFirstName(), dto.getLastName()));
+        if (dto.getFirstName() != null && dto.getLastName() != null) {
+            entity.setFacebookName(String.format("%s %s", dto.getFirstName(), dto.getLastName()));
+        } else {
+            entity.setFacebookName(DEFAULT_FACEBOOK_NAME);
+        }
         entity.setFacebookProfilePic(dto.getPicture().getData().getUrl());
         return entity;
     }

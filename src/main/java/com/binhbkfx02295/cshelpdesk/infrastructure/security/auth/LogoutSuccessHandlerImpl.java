@@ -35,7 +35,6 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
         employeeDTO.setUsername(user.getUsername());
 
         authenticationService.logout(employeeDTO);
-        log.info("Inside logout handler");
         response.sendRedirect("/login?logout");
     }
 }

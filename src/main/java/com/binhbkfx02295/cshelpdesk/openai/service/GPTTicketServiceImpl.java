@@ -6,7 +6,6 @@ import com.binhbkfx02295.cshelpdesk.openai.adapter.GPT41NanoAdapter;
 import com.binhbkfx02295.cshelpdesk.openai.model.GPTResult;
 import com.binhbkfx02295.cshelpdesk.openai.model.TicketEvaluateResult;
 import com.binhbkfx02295.cshelpdesk.ticket_management.performance.dto.PerformanceSummaryDTO;
-import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.TicketReportDTO;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.entity.Ticket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,6 @@ public class GPTTicketServiceImpl implements GPTTicketService{
 
     @Override
     public GPTResult analyze(List<Message> messages) {
-        log.info("ChatGPT analyzing... check model: {}", gpt41MiniAdapter.getModelSettings().toString());
         return gpt41MiniAdapter.analyze(messages);
     }
 

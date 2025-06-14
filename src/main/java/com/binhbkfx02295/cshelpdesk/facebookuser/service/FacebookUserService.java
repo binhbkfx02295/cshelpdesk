@@ -4,7 +4,6 @@ package com.binhbkfx02295.cshelpdesk.facebookuser.service;
 import com.binhbkfx02295.cshelpdesk.facebookgraphapi.dto.FacebookUserProfileDTO;
 import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserListDTO;
 import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserDetailDTO;
-import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserFetchDTO;
 import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserSearchCriteria;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.PaginationResponse;
@@ -14,22 +13,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface FacebookUserService {
+    String MSG_SUCCESS_CREATE_FACEBOOK_USER = "Khởi tạo người dùng Facebook thành công";
+    String MSG_SUCCESS_GET_ALL_FACEBOOK_USER = "Truy vấn tất cả khách hàng thành công";
+    String MSG_ERROR_GET_ALL_FACEBOOK_USER = "Truy vấn tất cả khách hàng thất bại";
+    String MSG_ERROR_VALIDATE_FACEBOOK_USER = "Lỗi ID khách hàng bị thiếu";
+    String MSG_ERROR_FACEBOOK_USER_NOT_EXISTS = "Khách hàng không tồn tại";
+    String MSG_SUCCESS_DELETE_FACEBOOK_USER = "Xóa Khách hàng thành công.";
+    String MSG_SUCCESS_GET_ALL_FACEBOOK_USERS = "Truy vấn tất cả khách hàng thành công.";
+    String MSG_ERROR_DELETE_FACEBOOK_USERS = "Xóa nhóm khách hàng thành công.";
 
-    static final String MSG_ERROR_USER_NOT_FOUND = "MSG_ERROR_USER_NOT_FOUND";
-
-    static final String MSG_ERROR_SEARCH_NOT_FOUND = "MSG_ERROR_SEARCH_NOT_FOUND";
-
-    static final String MSG_SUCCESS = "Success";
-
-    static final String MSG_ERROR_BAD_REQUEST = "MSG_ERROR_BAD_REQUEST";
-
-    static final String MSG_ERROR_INTERNAL_SERVER_ERROR = "MSG_ERROR_INTERNAL_SERVER_ERROR";
-
-    static final String MSG_ERROR_NOT_ALLOWED = "MSG_ERROR_NOT_ALLOWED";
 
     APIResultSet<FacebookUserDetailDTO> save(FacebookUserDetailDTO save);
-
-    APIResultSet<FacebookUserDetailDTO> save(FacebookUserFetchDTO save);
 
     APIResultSet<FacebookUserDetailDTO> update(FacebookUserDetailDTO updatedUser);
 

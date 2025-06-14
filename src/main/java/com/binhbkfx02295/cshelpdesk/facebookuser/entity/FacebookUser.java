@@ -33,7 +33,7 @@ public class FacebookUser {
 
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "facebookUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "facebookUser")
     private List<Ticket> tickets = new ArrayList<>();
 
 }

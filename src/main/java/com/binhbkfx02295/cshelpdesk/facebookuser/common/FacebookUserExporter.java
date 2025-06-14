@@ -45,7 +45,7 @@ public class FacebookUserExporter {
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         } catch (Exception e) {
-            log.info("Loi khong the tao excel", e);
+            log.error("Error message", e);
             return null;
         }
 

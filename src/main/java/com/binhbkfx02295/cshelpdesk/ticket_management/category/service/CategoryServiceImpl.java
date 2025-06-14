@@ -32,11 +32,9 @@ public class CategoryServiceImpl implements CategoryService {
             }
             Category saved = categoryRepository.save(mapper.toEntity(categoryDTO));
             cache.getAllCategories().put(saved.getId(), saved);
-            APIResultSet<CategoryDTO> result = APIResultSet.ok("Tạo danh mục thành công.", mapper.toDTO(saved));
-            log.info(result.getMessage());
-            return result;
+            return APIResultSet.ok("Tạo danh mục thành công.", mapper.toDTO(saved));
         } catch (Exception e) {
-            log.error("Lỗi khi tạo danh mục", e);
+            log.error("Error message", e);
             return APIResultSet.internalError("Đã xảy ra lỗi khi tạo danh mục.");
         }
     }
@@ -54,14 +52,12 @@ public class CategoryServiceImpl implements CategoryService {
             existing.setName(categoryDTO.getName());
             existing.setCode(categoryDTO.getCode());
             Category updated = categoryRepository.save(mapper.toEntity(categoryDTO));
-            if (cache.getAllCategories().containsKey((int)updated.getId())) {
+            if (cache.getAllCategories().containsKey(updated.getId())) {
                 cache.getAllCategories().put(updated.getId(), updated);
             }
-            APIResultSet<CategoryDTO> result = APIResultSet.ok("Cập nhật danh mục thành công.", mapper.toDTO(updated));
-            log.info(result.getMessage());
             return APIResultSet.ok("Cập nhật danh mục thành công.", mapper.toDTO(updated));
         } catch (Exception e) {
-            log.error("Lỗi khi cập nhật danh mục", e);
+            log.error("Error message", e);
             return APIResultSet.internalError("Đã xảy ra lỗi khi cập nhật danh mục.");
         }
     }
@@ -71,11 +67,9 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             categoryRepository.deleteById(id);
             cache.getAllCategories().remove(id);
-            APIResultSet<Void> result = APIResultSet.ok("Xóa danh mục thành công.", null);
-            log.info(result.getMessage());
-            return result;
+            return APIResultSet.ok("Xóa danh mục thành công.", null);
         } catch (Exception e) {
-            log.error("Lỗi khi xóa danh mục", e);
+            log.error("Error message", e);
             return APIResultSet.internalError("Không thể xóa danh mục. Có thể đang được liên kết với dữ liệu khác.");
         }
     }
@@ -84,10 +78,9 @@ public class CategoryServiceImpl implements CategoryService {
     public APIResultSet<List<CategoryDTO>> getAll() {
         try {
             List<Category> categories = cache.getAllCategories().values().stream().toList();
-            APIResultSet<List<CategoryDTO>> result = APIResultSet.ok("Lấy danh sách danh mục thành công.", categories.stream().map(mapper::toDTO).toList());
-            return result;
+            return APIResultSet.ok("Lấy danh sách danh mục thành công.", categories.stream().map(mapper::toDTO).toList());
         } catch (Exception e) {
-            log.error("Lỗi khi lấy danh sách danh mục", e);
+            log.error("Error message", e);
             return APIResultSet.internalError("Đã xảy ra lỗi khi lấy danh sách danh mục.");
         }
     }

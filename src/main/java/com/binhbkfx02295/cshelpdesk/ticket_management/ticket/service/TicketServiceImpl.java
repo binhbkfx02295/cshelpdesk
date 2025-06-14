@@ -32,10 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,15 +56,15 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public APIResultSet<TicketDetailDTO> createTicket(TicketDetailDTO dto) {
+        APIResultSet<TicketDetailDTO> result;
         try {
             APIResultSet<TicketDetailDTO> validationResult = validateTicketDTO(dto);
             if (validationResult.getHttpCode() != 200) {
-                log.error(validationResult.getMessage());
                 return validationResult;
             }
 
             if (dto.getFacebookUser() == null) {
-                return  APIResultSet.badRequest("Lỗi thiếu Facebook User ID");
+                return  APIResultSet.badRequest(MSG_ERROR_VALIDATION_NO_FACEBOOK_ID);
             }
             APIResultSet<Void> validateFacebookUser = facebookUserService.existsById(dto.getFacebookUser().getFacebookId());
             if (validateFacebookUser.getHttpCode() != 200) {
@@ -79,29 +76,26 @@ public class TicketServiceImpl implements TicketService {
                 ticket.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             }
             Ticket saved = ticketRepository.save(ticket);
-            //update cache
             entityManager.flush();
             entityManager.clear();
             cache.updateOpeningTickets();
-            log.info("Kiem tra id cua ticket saved: {}", saved.getId());
-            log.info("kiem tra map to detail DTO cua ticket: {}", mapper.toDetailDTO(cache.getTicket(saved.getId())));
-            APIResultSet<TicketDetailDTO> result = APIResultSet.ok("Created successfully", mapper.toDetailDTO(cache.getTicket(saved.getId())));
-            log.info(result.getMessage());
+            result = APIResultSet.ok(MSG_SUCCESS_CREATE_TICKET, mapper.toDetailDTO(cache.getTicket(saved.getId())));
             publisher.publishEvent(new TicketEvent(mapper.toDashboardDTO(cache.getTicket(saved.getId())), TicketEvent.Action.CREATED));
-            return result;
 
         } catch (Exception e) {
-            log.info("Loi khi tao moi ticket", e);
-            return APIResultSet.internalError();
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
     public APIResultSet<TicketDetailDTO> updateTicket(int id, TicketDetailDTO dto) {
+        APIResultSet<TicketDetailDTO> result;
         try {
             Optional<Ticket> existingOpt = ticketRepository.findByIdWithDetails(id);
             if (existingOpt.isEmpty()) {
-                return APIResultSet.notFound("Lỗi ticket không tồn tại");
+                return APIResultSet.notFound(MSG_ERROR_TICKET_NOT_EXISTS);
             }
 
             APIResultSet<TicketDetailDTO> validationResult = validateTicketDTO(dto);
@@ -135,7 +129,6 @@ public class TicketServiceImpl implements TicketService {
             }
             existing.setLastUpdateAt(new Timestamp(System.currentTimeMillis()));
             Ticket saved = ticketRepository.save(existing);
-            //update cache
             entityManager.flush();
             entityManager.clear();
             cache.updateOpeningTickets();
@@ -144,44 +137,31 @@ public class TicketServiceImpl implements TicketService {
                 if (temp == null) {
                     temp = ticketRepository.findByIdWithDetails(existing.getId()).get();
                 }
-
                 publisher.publishEvent(new TicketEvent(mapper.toDashboardDTO(temp), TicketEvent.Action.CLOSED));
             }
             else {
                 publisher.publishEvent(new TicketEvent(mapper.toDashboardDTO(cache.getTicket(existing.getId())), TicketEvent.Action.UPDATED));
             }
-
             Ticket temp = cache.getTicket(existing.getId());
-
-
             if (temp == null) {
                 temp = ticketRepository.findByIdWithDetails(existing.getId()).get();
             }
-            //return result
-            APIResultSet<TicketDetailDTO> result = APIResultSet.ok("Updated successfully", mapper.toDetailDTO(temp));
-            log.info(result.getMessage());
-            return result;
+            result = APIResultSet.ok(MSG_SUCCESS_UPDATE_TICKET, mapper.toDetailDTO(temp));
         } catch (Exception e) {
-            log.info("Loi khong the update Ticket ", e);
-            return APIResultSet.internalError();
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
     public APIResultSet<TicketDetailDTO> getTicketById(int id) {
         try {
-            Optional<Ticket> ticketOpt = ticketRepository.findByIdWithDetails(id);
-            return ticketOpt.map(ticket -> {
-                APIResultSet<TicketDetailDTO> result = APIResultSet.ok("Found", mapper.toDetailDTO(ticket));
-                log.info(result.getMessage());
-                return result;
-            }).orElseGet(() -> {
-                APIResultSet<TicketDetailDTO> result = APIResultSet.notFound("Ticket not found");
-                log.info(result.getMessage());
-                return result;
-            });
+            return ticketRepository.findByIdWithDetails(id)
+                    .map(ticket ->APIResultSet.ok("Found", mapper.toDetailDTO(ticket)))
+                    .orElseGet(() -> APIResultSet.notFound("Ticket not found"));
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error("Error message", e);
             return APIResultSet.internalError();
         }
     }
@@ -198,38 +178,31 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public APIResultSet<TicketDetailDTO> findExistingTicket(String facebookId) {
+        APIResultSet<TicketDetailDTO> result;
         try {
             Optional<Ticket> ticket = ticketRepository
                     .findFirstByFacebookUser_FacebookIdOrderByCreatedAtDesc(facebookId);
-
-            return ticket
-                    .map(value -> {
-                        APIResultSet<TicketDetailDTO> result = APIResultSet.ok("Đã tìm thấy ticket mới nhất", mapper.toDetailDTO(value));
-                        log.info(result.getMessage());
-                        return result;
-                    })
-                    .orElseGet(() -> {
-                        APIResultSet<TicketDetailDTO> result = APIResultSet.notFound("Không tìm thấy ticket.");
-                        log.info(result.getMessage());
-                        return result;
-                    });
+            result = ticket
+                    .map(value -> APIResultSet.ok(MSG_ERROR_TICKET_FOUND, mapper.toDetailDTO(value)))
+                    .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_TICKET_NOT_EXISTS));
         } catch (Exception e) {
-            log.error("Lỗi tìm ticket theo facebook user id: {} {}", e, e.getStackTrace());
-            return APIResultSet.internalError("Lỗi tìm ticket theo facebook user id");
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
     public APIResultSet<List<TicketListDTO>> findAllByFacebookUserId(String facebookId) {
+        APIResultSet<List<TicketListDTO>> result;
         try {
             List<Ticket> tickets = ticketRepository.findAllByFacebookUser_FacebookId(facebookId);
-            APIResultSet<List<TicketListDTO>> result = APIResultSet.ok("OK", tickets.stream().map(mapper::toListDTO).toList());
-            log.info(result.getMessage());
-            return result;
+            result = APIResultSet.ok(MSG_SUCCESS_GET_ALL_TICKETS, tickets.stream().map(mapper::toListDTO).toList());
         } catch (Exception e) {
-            log.error("Lỗi server" , e);
-            return APIResultSet.internalError();
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
@@ -244,28 +217,25 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public APIResultSet<Set<NoteDTO>> getNotes(int ticketId) {
+        APIResultSet<Set<NoteDTO>> result;
         try {
             if (!noteRepository.existsByTicket_Id(ticketId)) {
-                return APIResultSet.notFound("Không tìm thấy ticket.");
+                result = APIResultSet.notFound("Không tìm thấy ticket.");
+            } else {
+                result = APIResultSet.ok("Danh sách notes", noteRepository.findAllByTicket_Id(ticketId).stream()
+                        .map(Note::toDTO).collect(Collectors.toSet()));
             }
-
-            Set<NoteDTO> notes = noteRepository.findAllByTicket_Id(ticketId).stream()
-                    .map(Note::toDTO).collect(Collectors.toSet());
-
-            APIResultSet<Set<NoteDTO>> result = APIResultSet.ok("Danh sách notes", notes);
-            log.info(result.getMessage());
-            return result;
-
         } catch (Exception e) {
-            log.error("Lỗi server lấy tất cả note của ticket", e);
-            return APIResultSet.internalError("Lỗi server lấy tất cả note của ticket");
+            log.error("Error message", e);
+            result = APIResultSet.internalError("Lỗi server lấy tất cả note của ticket");
         }
+        return result;
     }
 
     @Override
     public APIResultSet<PaginationResponse<TicketListDTO>> searchTickets(TicketSearchCriteria criteria, Pageable pageable) {
+        APIResultSet<PaginationResponse<TicketListDTO>> result;
         try {
-            log.info(criteria.toString());
             var spec = TicketSpecification.build(criteria);
             var page = ticketRepository.findAll(spec, pageable);
             List<TicketListDTO> dtoList = page.getContent().stream()
@@ -278,48 +248,52 @@ public class TicketServiceImpl implements TicketService {
                     page.getTotalElements(),
                     page.getTotalPages()
             );
-            APIResultSet<PaginationResponse<TicketListDTO>> result = APIResultSet.ok("Tim ticket ok", pagination);
-            log.info(result.getMessage());
-            return result;
+            if (dtoList.isEmpty()) {
+                result = APIResultSet.notFound(MSG_ERROR_SEARCH_TICKETS_NOT_FOUND);
+            } else {
+                result = APIResultSet.ok(MSG_SUCCESS_SEARCH_TICKETS_FOUND, pagination);
+            }
         } catch (Exception e) {
-            log.error("Lỗi search ticket", e);
-            return APIResultSet.internalError("Không thể thực hiện tìm kiếm.");
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
 
 
     private APIResultSet<TicketDetailDTO> validateTicketDTO(TicketDetailDTO dto) {
+
         if (dto.getAssignee() != null &&
                 cache.getEmployee(dto.getAssignee().getUsername()) == null) {
-            return APIResultSet.badRequest("Lỗi Staff không tồn tại: " + dto.getAssignee());
+            return APIResultSet.badRequest(MSG_ERROR_VALIDATION_EMPLOYEE_NOT_EXISTS);
         }
 
         if (dto.getProgressStatus() == null) {
-            return APIResultSet.badRequest("Lỗi thiếu trình trạng xử lý");
+            return APIResultSet.badRequest(MSG_ERROR_VALIDATION_NO_PROGRESS_STATUS);
         } else if (cache.getProgress(dto.getProgressStatus().getId()) == null){
-            return APIResultSet.badRequest("Lỗi tình trạng xử lý không tồn tại " + dto.getProgressStatus().getId());
+            return APIResultSet.badRequest(MSG_ERROR_VALIDATION_PROGRESS_STATUS_NOT_EXISTS);
         }
 
         if (dto.getCategory() != null &&
                 cache.getCategory(dto.getCategory().getId()) == null) {
-            return APIResultSet.badRequest("Lỗi mã phân loại không tồn tại " + dto.getCategory().getId());
+            return APIResultSet.badRequest(MSG_ERROR_VALIDATION_CATEGORY_NOT_EXISTS);
         }
 
         if (dto.getEmotion() != null &&
                 cache.getEmotion(dto.getEmotion().getId()) == null) {
-            return APIResultSet.badRequest("Lỗi mã cảm xúc không tồn tại " + dto.getEmotion().getId());
+            return APIResultSet.badRequest(MSG_ERROR_VALIDATION_EMOTION_NOT_EXISTS);
         }
 
         if (dto.getSatisfaction() != null &&
                 cache.getSatisfaction(dto.getSatisfaction().getId()) == null) {
-            return APIResultSet.badRequest("Lỗi mã hài lòng không tồn tại " + dto.getSatisfaction().getCode());
+            return APIResultSet.badRequest(MSG_ERROR_VALIDATION_SATISFACTION_NOT_EXISTS);
         }
 
         if (dto.getTags() != null) {
             for (TagDTO tag : dto.getTags()) {
                 if (cache.getTag(tag.getId()) == null) {
-                    return APIResultSet.badRequest("Lỗi tag không tồn tại " + tag);
+                    return APIResultSet.badRequest(MSG_ERROR_VALIDATION_TAG_NOT_EXISTS);
                 }
             }
         }
@@ -329,40 +303,43 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public APIResultSet<Void> deleteById(int ticketId) {
+        APIResultSet<Void> result;
         try {
-            ticketRepository.deleteById(ticketId);
-            cache.updateOpeningTickets();
-            log.info("Delete ticket id {} OK", ticketId);
-            cache.getDashboardTickets().remove(ticketId);
-            return APIResultSet.ok(String.format("Delete ticket id %d OK", ticketId), null);
+            if (!ticketRepository.existsById(ticketId)) {
+                result = APIResultSet.notFound(MSG_ERROR_TICKET_NOT_EXISTS);
+            } else {
+                ticketRepository.deleteById(ticketId);
+                cache.updateOpeningTickets();
+                cache.getDashboardTickets().remove(ticketId);
+                result = APIResultSet.ok("Xóa ticket thành công.", null);
+            }
         }
         catch(Exception e) {
-            return APIResultSet.internalError();
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
 
 
     @Override
     public APIResultSet<List<TicketDashboardDTO>> getForDashboard(String username) {
+        APIResultSet<List<TicketDashboardDTO>> result;
         try {
             List<Ticket> tickets = cache.getDashboardTickets().values().stream().toList();
             Employee employee = cache.getEmployee(username);
-
             if (employee != null && employee.getUserGroup().getCode().equalsIgnoreCase("staff")) {
                 tickets = tickets.stream().filter(ticket ->
                         ticket.getAssignee() == null || ticket.getAssignee().getUsername().equalsIgnoreCase(username)).toList();
             }
-
-            APIResultSet<List<TicketDashboardDTO>> result = APIResultSet.ok("Lay ticket cho dashboard thanh cong",
+            result = APIResultSet.ok(MSG_SUCCESS_SEARCH_TICKETS_FOUND,
                     tickets.stream().map(mapper::toDashboardDTO).toList());
-
-            log.info(result.getMessage());
-            return result;
         } catch(Exception e) {
-            log.error("LOi khong the fetch ticket cho dashboard", e);
-            return APIResultSet.internalError();
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
@@ -374,19 +351,14 @@ public class TicketServiceImpl implements TicketService {
 
         List<MessageDTO> messageList = ticket.getMessages();
         messageList.sort((o1, o2) -> o1.getId() - o2.getId());
-
-        log.info("bat dau tinh");
         for (int i = 0; i < messageList.size(); i++) {
             MessageDTO current = messageList.get(i);
             if (i==0 && current.isSenderEmployee()) {
-                log.info("o day ne");
                 break;
             }
 
             if (current.isSenderEmployee()) {
                 MessageDTO customerMessage = messageList.get(i-1);
-                log.info(current.toString());
-                log.info(customerMessage.toString());
                 firstResponseRate = (current.getTimestamp().getTime() - customerMessage.getTimestamp().getTime()) / 1000;
                 break;
             }
@@ -419,9 +391,6 @@ public class TicketServiceImpl implements TicketService {
         ticket.setFirstResponseTime(firstResponseRate);
         ticket.setAvgResponseTime(overallResponseRate);
         ticket.setResolutionTime(resolutionRate);
-        log.info("Ticket {} closed, tinh KPI thanh cong: {} {} {}", ticket.getId(), firstResponseRate,
-                overallResponseRate,
-                resolutionRate);
     }
 
 
@@ -432,42 +401,40 @@ public class TicketServiceImpl implements TicketService {
             List<Ticket> tickets = ticketRepository.findResolvedByMonth(startOfMonth, endOfMonth);
             result = APIResultSet.ok("OK", tickets.stream().map(mapper::toReportDTO).toList());
         } catch (Exception e) {
-            log.error("", e);
+            log.error("Error message", e);
             result = APIResultSet.internalError();
         }
-        log.info(result.getMessage());
         return result;
     }
 
     @Override
     public APIResultSet<List<TicketVolumeReportDTO>> searchTicketsForVolumeReport(Timestamp fromTime, Timestamp toTime) {
+        APIResultSet<List<TicketVolumeReportDTO>> result;
         try {
             List<TicketVolumeReportDTO> tickets = ticketRepository.findTicketsForHourlyReport(fromTime, toTime);
-            APIResultSet<List<TicketVolumeReportDTO>> result = APIResultSet.ok(String.format("Lấy ticket cho report thành công, tổng cộng %s", tickets.size()), tickets);
-            log.info(result.getMessage());
-            return result;
+            result = APIResultSet.ok(MSG_SUCCESS_SEARCH_TICKETS_FOUND, tickets);
         } catch (Exception e) {
-            log.info("Lỗi không thể lấy ticket cho report", e);
-            return APIResultSet.internalError();
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
+        return result;
     }
 
     @Override
-    public APIResultSet<TicketDetailDTO> assignTicket(int id, TicketDetailDTO dto) {
+    public void assignTicket(int id, TicketDetailDTO dto) {
         APIResultSet<TicketDetailDTO> result;
         try {
             if (dto.getAssignee() == null) {
-                result = APIResultSet.badRequest("Lỗi chưa gán assignee");
+                result = APIResultSet.badRequest(MSG_ERROR_ASSIGN_NO_EMPLOYEE_CHOSEN);
             } else {
                 result = updateTicket(id, dto);
                 publisher.publishEvent(new TicketAssignedEvent(mapper.toDashboardDTO(cache.getTicket(id))));
             }
         } catch (Exception e) {
-            log.error("TicketServiceImpl.assignTicket: loi server", e);
-            result = APIResultSet.internalError("Lỗi không thể assign ticket");
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
-        log.info(result.getMessage());
-        return result;
+
     }
 
     @Override
@@ -475,14 +442,17 @@ public class TicketServiceImpl implements TicketService {
         APIResultSet<List<TicketReportDTO>> result;
         try {
             List<Ticket> tickets = ticketRepository.findResolvedWithMessages();
-            result = APIResultSet.ok("Lấy ticket thành công", tickets.stream().map(mapper::toReportDTO).toList());
+            result = APIResultSet.ok(
+                    MSG_SUCCESS_SEARCH_TICKETS_FOUND,
+                    tickets
+                            .stream()
+                            .map(mapper::toReportDTO)
+                            .toList());
         } catch (Exception e) {
-            result = APIResultSet.internalError("Lỗi không thể assign ticket");
-            log.error(result.getMessage(), e);
+            log.error("Error message", e);
+            result = APIResultSet.internalError();
         }
         return result;
     }
-
-
 }
 

@@ -21,7 +21,6 @@ public class AuthenticationFailureHandlerImpl implements AuthenticationFailureHa
                                         HttpServletResponse response,
                                         AuthenticationException exception)
             throws IOException {
-        log.info("in side login failure handler");
         // Gửi lỗi về view qua session
         HttpSession session = request.getSession();
         session.setAttribute("loginError", exception.getMessage());
