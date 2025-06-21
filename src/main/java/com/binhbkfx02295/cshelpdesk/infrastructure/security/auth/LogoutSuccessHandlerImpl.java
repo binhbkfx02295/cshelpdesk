@@ -15,8 +15,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-
-import java.util.List;
+import java.sql.Timestamp;
 
 @Component
 @RequiredArgsConstructor
@@ -33,7 +32,6 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
         EmployeeDTO employeeDTO = new EmployeeDTO();
         UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
         employeeDTO.setUsername(user.getUsername());
-
         authenticationService.logout(employeeDTO);
         response.sendRedirect("/login?logout");
     }

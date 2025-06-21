@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
 
-
     private final EmployeeRepository employeeRepository;
     private final UserGroupRepository userGroupRepository;
     private final PasswordEncoder passwordEncoder;
@@ -87,6 +86,9 @@ public class EmployeeServiceImpl implements EmployeeService {
             result = APIResultSet.notFound(MSG_ERROR_EMPLOYEE_NOT_EXIST);
         } else {
             try {
+                if (cache.getUserGroup(employeeDTO.getUserGroup().getGroupId()) == null) {
+                    return APIResultSet.badRequest(MSG_ERROR_USERGROUP_NOT_EXISTS);
+                }
                 mapper.mergeToUser(user, employeeDTO);
                 Employee saved = employeeRepository.save(user);
                 entityManager.flush();
@@ -133,8 +135,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
             Employee user = userOpt.get();
             //validate password
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                APIResultSet.badRequest(MSG_ERROR_WRONG_PASSWORD);
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                return APIResultSet.badRequest(MSG_ERROR_WRONG_PASSWORD);
             }
             user.setPassword(passwordEncoder.encode(newPassword));
             employeeRepository.save(user);
@@ -198,7 +200,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                     entityManager.flush();
                     entityManager.clear();
                     cache.updateAllEmployees();
-                    publisher.publishEvent(new EmployeeEvent(EmployeeEvent.Action.UPDATED, mapper.toDTO(cache.getEmployee(logDTO.getUsername()))));
+                    publisher.publishEvent(new EmployeeEvent(EmployeeEvent.Action.UPDATED, mapper.toDashboardDTO(cache.getEmployee(logDTO.getUsername()))));
                     return APIResultSet.ok(MSG_SUCCESS_UPDATE_ONLINE_STATUS, null);
                 } else {
                     return APIResultSet.badRequest(MSG_ERROR_UPDATE_ONLINE_STATUS);
@@ -214,12 +216,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public APIResultSet<Void> deleteByUsername(String username) {
         try {
+            if (!employeeRepository.existsByUsername(username)) {
+                return APIResultSet.badRequest(MSG_ERROR_EMPLOYEE_NOT_EXIST);
+            }
             employeeRepository.deleteByUsername(username);
             entityManager.flush();
             entityManager.clear();
             cache.getAllEmployees().remove(username);
-            APIResultSet<Void> result = APIResultSet.ok(MSG_SUCCESS_DELETE_EMPLOYEE, null);
-            return result;
+            return APIResultSet.ok(MSG_SUCCESS_DELETE_EMPLOYEE, null);
         } catch (Exception e) {
             return APIResultSet.internalError();
         }

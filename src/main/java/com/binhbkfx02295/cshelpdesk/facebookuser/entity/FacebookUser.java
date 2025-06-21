@@ -3,8 +3,6 @@ package com.binhbkfx02295.cshelpdesk.facebookuser.entity;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.entity.Ticket;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.Instant;
 import java.util.ArrayList;

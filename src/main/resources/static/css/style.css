@@ -1074,8 +1074,6 @@ a {
   border-radius: 4px;
   background-color: #f8f9fa;
   box-shadow: 0 2px 25px rgba(0, 0, 0, 0.15);
-  transition: opacity 0.8s;
-  opacity: 0;
 }
 #ticketList .item.visible {
   opacity: 1;
@@ -1633,14 +1631,14 @@ a {
   font-size: 12px !important;
 }
 .chart-item .chart-header i,
-.chart-item .chart-header .dateOption {
+.chart-item .chart-header .dateOption, .chart-item .chart-header .flatpick {
   padding: 5px;
   border-radius: 2px;
   font-size: 14px;
 }
 .chart-item .chart-header i:hover, .chart-item .chart-header i.active,
 .chart-item .chart-header .dateOption:hover,
-.chart-item .chart-header .dateOption.active {
+.chart-item .chart-header .dateOption.active, .chart-item .chart-header .flatpick:hover, .chart-item .chart-header .flatpick.active {
   background-color: #dee2e6;
   color: #343a40;
 }

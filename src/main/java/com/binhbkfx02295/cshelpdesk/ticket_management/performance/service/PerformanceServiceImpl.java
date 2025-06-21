@@ -36,6 +36,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PerformanceServiceImpl implements PerformanceService {
 
+    public static final String MSG_SUCCESS_CREATE_PERFORMANCE_REPORT = "Tạo report thành công";
+    public static final String MSG_SUCCESS_BATCH_EVALUATE = "Đánh giá tickets thành công";
+    public static final String MSG_SUCCESS_UPDATE_TICKET_ASSESSMENT = "Cập nhật ticket thành công";
+    public static final String MSG_ERROR_TICKET_ASSESSMENT_NOT_FOUND = "Không tìm thấy ticket";
+    public static final String MSG_SUCCESS_GET_TICKET_ASSESSMENT = "Tìm ticket thành công";
     private final MasterDataCache cache;
     private final PerformanceMapper mapper;
     private final CriteriaRepository criteriaRepository;
@@ -98,7 +103,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 //        report.getSummary().setChatGPTsummary(chatGPTsummary);
 
         try {
-            result = APIResultSet.ok("Tạo report thành công", report);
+            result = APIResultSet.ok(MSG_SUCCESS_CREATE_PERFORMANCE_REPORT, report);
         } catch (Exception e) {
             log.error("Error message", e);
             result = APIResultSet.internalError();
@@ -224,7 +229,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 
                 i += batchSize;
             }
-            result = APIResultSet.ok("Đánh giá tickets thành công", null);
+            result = APIResultSet.ok(MSG_SUCCESS_BATCH_EVALUATE, null);
         } catch (Exception e) {
             log.error("Error message", e);
             result = APIResultSet.internalError();
@@ -294,8 +299,8 @@ public class PerformanceServiceImpl implements PerformanceService {
         try {
             Optional<TicketAssessment> ticketOtp = ticketAssessmentRepository.findByTicketId(id);
             result = ticketOtp
-                    .map(ticketAssessment -> APIResultSet.ok("Tìm ticket thành công", ticketAssessmentMapper.toDetailDTO(ticketAssessment)))
-                    .orElseGet(() -> APIResultSet.badRequest("Không tìm thấy ticket"));
+                    .map(ticketAssessment -> APIResultSet.ok(MSG_SUCCESS_GET_TICKET_ASSESSMENT, ticketAssessmentMapper.toDetailDTO(ticketAssessment)))
+                    .orElseGet(() -> APIResultSet.badRequest(MSG_ERROR_TICKET_ASSESSMENT_NOT_FOUND));
         } catch (Exception e) {
             log.error("Error message", e);
             result = APIResultSet.internalError();
@@ -311,9 +316,9 @@ public class PerformanceServiceImpl implements PerformanceService {
             result = ticketOtp
                     .map(ticketAssessment -> {
                         TicketAssessment saved = ticketAssessmentRepository.save(ticketAssessmentMapper.mergeToEntity(ticketOtp.get(), dto));
-                        return APIResultSet.ok("Tìm ticket thành công", ticketAssessmentMapper.toDetailDTO(saved));
+                        return APIResultSet.ok(MSG_SUCCESS_UPDATE_TICKET_ASSESSMENT, ticketAssessmentMapper.toDetailDTO(saved));
                     })
-                    .orElseGet(() -> APIResultSet.badRequest("Không tìm thấy ticket"));
+                    .orElseGet(() -> APIResultSet.badRequest(MSG_ERROR_TICKET_ASSESSMENT_NOT_FOUND));
         } catch (Exception e) {
             log.error("Error message", e);
             result = APIResultSet.internalError();

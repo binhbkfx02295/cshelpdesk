@@ -1,8 +1,12 @@
 <!DOCTYPE html >
-<html lang="en" th:replace="~{layout:: layout(~{::title}, ~{}, ~{::div.page-content}, ~{::scripts})}"
+<html lang="en" th:replace="~{layout:: layout(~{::title}, ~{::links}, ~{::div.page-content}, ~{::scripts})}"
       xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>CSHelpDesk | Báo Cáo</title>
+    <th:block th:fragment="links">
+        <!--        Flatpickr CSS-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    </th:block>
 </head>
 <body>
 
@@ -41,7 +45,7 @@
                                 <!-- date range option -->
                                 <div class="field-group dateRange">
                                     <!-- <input type="text" id="dateRange" placeholder="Chọn ngày..." /> -->
-                                    <div type="text" class="dateRangeOption" placeholder="Chọn ngày..."><i
+                                    <div type="text" class="flatpick" placeholder="Chọn ngày..."><i
                                             class="bi bi-calendar"></i></div>
                                 </div>
 
@@ -134,7 +138,7 @@
                                 <!-- date range option -->
                                 <div class="field-group dateRange">
                                     <!-- <input type="text" id="dateRange" placeholder="Chọn ngày..." /> -->
-                                    <div type="text" class="dateRangeOption" placeholder="Chọn ngày..."><i
+                                    <div type="text" class="flatpick" placeholder="Chọn ngày..."><i
                                             class="bi bi-calendar"></i></div>
                                 </div>
 
@@ -226,7 +230,7 @@
                                 <!-- date range option -->
                                 <div class="field-group dateRange">
                                     <!-- <input type="text" id="dateRange" placeholder="Chọn ngày..." /> -->
-                                    <div type="text" class="dateRangeOption" placeholder="Chọn ngày..."><i
+                                    <div type="text" class="flatpick" placeholder="Chọn ngày..."><i
                                             class="bi bi-calendar"></i></div>
                                 </div>
 
@@ -365,12 +369,14 @@
 
 </body>
 <th:block th:fragment="scripts">
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
+
     <!-- chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair"></script>
-    <!-- Flatpickr JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
+
 </th:block>
 </html>

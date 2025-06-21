@@ -161,7 +161,7 @@ function renderDashboardEmployeeItem(employee) {
               <span class="status-indicator ${employee.statusLog.status.name}"></span>
               <span class="status-text">${sanitizeText(employee.statusLog.status.name)}</span>
             </td>
-            ${employee.statusLog.status == "offline" ? "" : `<td class="time-elapse" data-timestamp="${employee.statusLog.from}">${startElapsedTimer(employee.statusLog.from)}</td>`}
+            ${employee.statusLog.status == "offline" ? "" : `<td class="${employee.statusLog?.status.id == 3 ? "" : "time-elapse"}" data-timestamp="${employee.statusLog.from}">${employee.statusLog?.status.id != 3 ? startElapsedTimer(employee.statusLog.from) : "- -"}</td>`}
         `;
   console.log(tr);
   return tr;
@@ -241,8 +241,8 @@ function initCustomer() {
       window.customerDeleteModal.show();
 
       if (deleteCustomerHandler) {
-            confirmBtn.removeEventListener("click", deleteCustomerHandler);
-        }
+        confirmBtn.removeEventListener("click", deleteCustomerHandler);
+      }
 
       deleteCustomerHandler = function () {
         //get array of ids
@@ -954,8 +954,9 @@ function subscribeForStaff(stompClient) {
 function handleWSTicket(response) {
   response = JSON.parse(response.body);
   let ticket = response.data;
-
+  console.log("..hanlding WS ticket", ticket);
   if (window.location.href.includes("today-ticket")) {
+
     const container = document.getElementById("ticketList");
     if (container != null) {
       const item = renderDashboardTicketItem(ticket);
@@ -963,9 +964,11 @@ function handleWSTicket(response) {
         case "CREATED":
           playNewTicketNotificationSound();
           showPopupNotification("Có ticket mới! ID: ", ticket.id);
-          container.firstChild != null
-            ? container.insertBefore(item, container.firstChild)
-            : container.appendChild(item);
+          const items = container.querySelectorAll(".item");
+          if (items.length == 0) {
+            container.innerHTML = ``;
+          }
+          container.insertBefore(item, container.firstChild)
           break;
         case "UPDATED":
           container.replaceChild(item, container.querySelector(`*[data-ticket-id="${ticket.id}"]`));
@@ -997,6 +1000,13 @@ function handleWSTicket(response) {
       bindDashboardTicketItem();
     }
 
+  } else {
+    switch (response.action) {
+      case "CREATED":
+        playNewTicketNotificationSound();
+        showPopupNotification("Có ticket mới! ID: ", ticket.id);
+        break;
+    }
   }
 
   if (window.location.href.includes("today-staff")) {
@@ -1040,8 +1050,8 @@ function handleWSMessage(response) {
 
     //TODO: nếu detail modal đang mở, thì add tin nhắn vào đó, tự scroll xuống
     handleIfModalOpen(message);
-
-
+  } else {
+    playNewMessageNotificationSound()
   }
 }
 
@@ -1062,27 +1072,16 @@ function handleWSEmployee(response) {
   console.log("..handling websocket employee", response);
   let employee = response.data;
   if (window.location.href.includes("today-staff")) {
-    //1. Tìm row item chứa thằng employee
-    console.log(employee);
-    const container = document.getElementById("employeeList2");
-    const statusLog = employee.statusLogs[0];
-    console.log("This is container", container);
-    const tr = container.querySelector(`*[data-username=${employee.username}]`);
-    console.log("This is tr", tr);
-    const statusIndicator = tr.querySelector(`.status-indicator`);
-    const statusText = tr.querySelector(`.status-text`);
-    //2. sửa cột status log;
-    const oldStatus = statusIndicator.classList[1]
-    statusIndicator.classList.remove(oldStatus);
-    statusIndicator.classList.add(statusLog.status.name);
-    statusText.innerText = toCapital(statusLog.status.name);
-
-    //3. set timer cua no ve 00:00:00
-    const dataTimestamp = tr.querySelector("*[data-timestamp]");
-    dataTimestamp.setAttribute("data-timestamp", statusLog.from);
-    //4. unbind rồi bind lại timer;
-    bindDashboardEmployeeItem();
-
+    console.log("..handling websocket employee", response);
+    let employee = response.data;
+    let employeeElem = renderDashboardEmployeeItem(employee);
+    if (window.location.href.includes("today-staff")) {
+      //1. Tìm row item chứa thằng employee
+      console.log(employee);
+      const container = document.getElementById("employeeList2");
+      const tr = container.querySelector(`*[data-username=${employee.username}]`);
+      container.replaceChild(employeeElem, tr);
+    }
   }
 }
 
@@ -1145,7 +1144,15 @@ function refreshDashboardTicket() {
 
     data = sortDashboardTicket(response.data);
     showLoadingElement(container);
-    populateData(data, container, renderDashboardTicketItem)
+    populateData(data, container, renderDashboardTicketItem, function () {
+      const div = document.createElement("div");
+      div.innerHTML = `
+      <div id="no-ticket-result" class="text-center text-muted py-3" style="display: block;">
+        <i class="bi bi-inbox me-1"></i> Hiện chưa có ticket mới.
+      </div>
+      `;
+      return div
+    })
 
     //after render tickets, start  event
     bindDashboardTicketItem()
@@ -1273,9 +1280,6 @@ function renderDashboardTicketItem(ticket) {
   target.addEventListener("click", function () {
     loadTicketDetail($(this).data("ticket-id"));
   })
-  setTimeout(function () {
-    target.style.opacity = 1;
-  }, 300);
 
   return target;
 
@@ -1339,7 +1343,7 @@ function populateTicketDetail(ticket) {
   // } else {
   //   $("#editTags").val([]);
   // }
-  disableEditButtons();
+  // disableEditButtons();
 }
 
 
@@ -1435,7 +1439,6 @@ function startElapsedTimer(startTimestamp) {
 function toCapital(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
-
 
 function loadDropdownField(ul, input, loadFn, globalVarName, dataKey, labelKey, valueKey) {
   (async function () {
@@ -1628,9 +1631,10 @@ function initTicketDetailModal() {
     }
   })
 
-  $("#ticketInfoColumn").on("input change", "input, select, textarea", function () {
-    enableEditButtons();
-  });
+  // $("#ticketInfoColumn").on("input change", "input, select, textarea", function () {
+  //   console.log("change");
+  //   enableEditButtons();
+  // });
 
   $("#cancelEdit").click(function () {
     if (!originalTicketData) return;
@@ -1642,7 +1646,7 @@ function initTicketDetailModal() {
     $("#editAssignee").val(originalTicketData.employee?.name || "- -");
     $("#editDescription").val(originalTicketData.description);
 
-    disableEditButtons();
+    // disableEditButtons();
   });
 
   // Save edit
@@ -1670,7 +1674,7 @@ function updateTicketData(ticketData) {
     loadTicketDetail($("#editTicketId").val())
 
   }
-  disableEditButtons();
+  // disableEditButtons();
   openAPIxhr(HTTP_PUT_METHOD, url, callback, null, ticketData);
 }
 
@@ -1961,7 +1965,7 @@ function loadTicketSearch(page = null, pageSize = null) {
       performTicketSearch);
     successToast(response.message);
   }
-  errorCallback = function(response) {
+  errorCallback = function (response) {
     if (response.httpCode == 404) {
       errorToast(response.message);
       container.innerHTML = "";
@@ -2535,19 +2539,31 @@ function initReport() {
   }
 
   function initChartController(container, api) {
+    console.log("init flatpickr selector: ", `#${container.id} .flatpick`);
     // ========= DATE RANGE OPTION ====
-    flatpickr(".dateRangeOption", {
+    flatpickr(`#${container.id} .flatpick`, {
       mode: "range",
       dateFormat: "Y-m-d",
       onChange: function (selectedDates, dateStr, instance) {
 
         if (selectedDates.length === 2) {
           const startTimestamp = selectedDates[0].getTime();
-          const endTimestamp = selectedDates[1].getTime();
+          const endTimestamp = selectedDates[1].setHours(23, 59, 59, 99);
 
           console.log("Start:", startTimestamp, "End:", endTimestamp);
-          instance.element.setAttribute("data-fromTime", startTimestamp);
-          instance.element.setAttribute("data-toTime", endTimestamp);
+          container.querySelectorAll(".active").forEach(item => {
+            item.classList.remove("active");
+          })
+          instance.element.classList.add("active");
+
+          params = {
+            label: dateStr,
+            fromTime: startTimestamp,
+            toTime: endTimestamp,
+            type: "bar",
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          }
+          fetchMainDataset(container, params, api);
         }
       }
     });
@@ -2556,7 +2572,7 @@ function initReport() {
     container.querySelectorAll(".dateOption").forEach(option => {
       option.addEventListener("click", function () {
         // ==== styling ===
-        container.querySelectorAll(".dateOption").forEach(item => {
+        container.querySelectorAll(".active").forEach(item => {
           item.classList.remove("active");
         })
         option.classList.add("active");
@@ -3619,7 +3635,11 @@ function initSetting() {
     submitEdit.addEventListener("click", function () {
       console.log("...submit edit employee");
       let data = getUpdateEmployeeDataField(modalId);
-      updateEmployee(data);
+      updateEmployee(data, function (response) {
+        setTimeout(function () {
+          fetchDetailEmployee(response.data.username);
+        }, 500)
+      });
 
     })
 
@@ -3831,7 +3851,7 @@ function initSetting() {
       container.append(employeeElem);
     }, null, data)
   }
-  function updateEmployee(data) {
+  function updateEmployee(data, callback = null) {
     console.log("..updating following employee:", data);
     openAPIxhr(HTTP_PUT_METHOD, `${API_EMPLOYEE}`, function (response) {
       console.log("..update thanh cong", response);
@@ -3842,11 +3862,13 @@ function initSetting() {
       console.log("oldchild", oldChild);
       let item = renderEmployeeItem(response.data);
       container.replaceChild(item, oldChild);
-
       employeeDetailModal.hide()
-      setTimeout(function () {
-        fetchDetailEmployee(response.data.username);
-      }, 500)
+      // setTimeout(function () {
+      //   fetchDetailEmployee(response.data.username);
+      // }, 500)
+      if (callback != null) {
+        callback(response);
+      }
 
     }, null, data)
   }

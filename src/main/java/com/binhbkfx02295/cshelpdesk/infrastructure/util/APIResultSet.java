@@ -20,7 +20,7 @@ public class APIResultSet<D> {
     private static final String MSG_NOT_FOUND = HttpStatus.NOT_FOUND.toString();
     private static final String MSG_FORBIDDEN = HttpStatus.FORBIDDEN.toString();
     private static final String MSG_BAD_REQUEST = HttpStatus.BAD_REQUEST.toString();
-    private static final String MSG_INTERNAL_ERROR = "Lỗi hệ thống";
+    public static final String MSG_INTERNAL_ERROR = "Lỗi hệ thống";
     private static final String MSG_UNAUTHORIZED = HttpStatus.UNAUTHORIZED.toString();
 
     private int httpCode;

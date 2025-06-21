@@ -90,6 +90,8 @@ public class FacebookUserRepository implements FacebookUserDAO {
                 queryBuilder.append(" AND f.zalo LIKE :zalo");
             }
 
+            queryBuilder.append(" ORDER BY f.createdAt DESC");
+
             var query = entityManager.createQuery(queryBuilder.toString(), FacebookUser.class);
             var countQuery = entityManager.createQuery(countQueryBuilder.toString(), Long.class);
             if (criteria.getFacebookId() != null && !criteria.getFacebookId().isBlank()) {

@@ -2,7 +2,7 @@ package com.binhbkfx02295.cshelpdesk.infrastructure.security.auth;
 
 import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginRequestDTO;
 import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginResponseDTO;
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.service.AuthenticationServiceImpl;
+import com.binhbkfx02295.cshelpdesk.employee_management.authentication.service.AuthenticationService;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 
-    private final AuthenticationServiceImpl authenticationService;
+    private final AuthenticationService authenticationService;
 
 
     @Override

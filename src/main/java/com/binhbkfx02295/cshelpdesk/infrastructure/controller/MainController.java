@@ -1,6 +1,5 @@
 package com.binhbkfx02295.cshelpdesk.infrastructure.controller;
 
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.service.AuthenticationServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

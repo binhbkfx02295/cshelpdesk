@@ -19,7 +19,6 @@ import java.util.Map;
 @Slf4j
 public class GPTTicketServiceImpl implements GPTTicketService{
 
-    private final GPT41NanoAdapter adapter;
     private final GPT41MiniAdapter gpt41MiniAdapter;
 
     @Override

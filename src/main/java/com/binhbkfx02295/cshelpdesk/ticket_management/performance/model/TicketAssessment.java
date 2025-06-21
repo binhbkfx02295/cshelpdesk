@@ -47,10 +47,6 @@ public class TicketAssessment {
     @Column(nullable = false)
     private float resolutionTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "satisfaction_id")
-    private Satisfaction satisfaction;
-
     @ManyToMany()
     @JoinTable(name = "ticket_assessment_criteria",
     joinColumns = @JoinColumn(name = "ticket_assessment_id"),

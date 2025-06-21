@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TicketServiceImpl implements TicketService {
 
+
     private final TicketRepository ticketRepository;
     private final TicketMapper mapper;
     private final NoteRepository noteRepository;
@@ -158,8 +159,8 @@ public class TicketServiceImpl implements TicketService {
     public APIResultSet<TicketDetailDTO> getTicketById(int id) {
         try {
             return ticketRepository.findByIdWithDetails(id)
-                    .map(ticket ->APIResultSet.ok("Found", mapper.toDetailDTO(ticket)))
-                    .orElseGet(() -> APIResultSet.notFound("Ticket not found"));
+                    .map(ticket ->APIResultSet.ok(MSG_SUCCESS_GET_TICKET, mapper.toDetailDTO(ticket)))
+                    .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_GET_TICKET_NOT_FOUND));
         } catch (Exception e) {
             log.error("Error message", e);
             return APIResultSet.internalError();

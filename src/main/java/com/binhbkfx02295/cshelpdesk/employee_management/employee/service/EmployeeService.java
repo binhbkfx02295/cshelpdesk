@@ -25,6 +25,7 @@ public interface EmployeeService {
     String MSG_ERROR_WRONG_PASSWORD = "Sai mật khẩu hoặc tên đăng nhập";
     String MSG_SUCCESS_GET_EMPLOYEE = "Truy vấn người dùng thành công";
     String MSG_ERROR_GET_EMPLOYEE = "Truy vấn người dùng thất bại";
+    String MSG_ERROR_USERGROUP_NOT_EXISTS = "Nhóm người dùng không tồn tại";
 
     APIResultSet<EmployeeDTO> createUser(EmployeeDTO employeeDTO);
     APIResultSet<EmployeeDetailDTO> updateUser(String username, EmployeeDTO employee);

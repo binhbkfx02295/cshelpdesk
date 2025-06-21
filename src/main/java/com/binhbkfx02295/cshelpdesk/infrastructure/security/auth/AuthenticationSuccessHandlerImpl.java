@@ -1,5 +1,6 @@
 package com.binhbkfx02295.cshelpdesk.infrastructure.security.auth;
 
+import com.binhbkfx02295.cshelpdesk.employee_management.employee.service.EmployeeService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +15,11 @@ import java.io.IOException;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {
+
+    private final EmployeeService employeeService;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,

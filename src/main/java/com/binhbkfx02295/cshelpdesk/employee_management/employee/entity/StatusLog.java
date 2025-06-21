@@ -29,4 +29,9 @@ public class StatusLog {
 
     @CreationTimestamp
     private Timestamp timestamp;
+
+    @Override
+    public String toString() {
+        return "StatusLog{}";
+    }
 }

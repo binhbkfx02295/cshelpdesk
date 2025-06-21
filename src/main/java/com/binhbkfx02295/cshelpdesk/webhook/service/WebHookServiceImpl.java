@@ -10,10 +10,10 @@ import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserDetailDTO;
 import com.binhbkfx02295.cshelpdesk.facebookuser.mapper.FacebookUserMapper;
 import com.binhbkfx02295.cshelpdesk.facebookuser.service.FacebookUserService;
 import com.binhbkfx02295.cshelpdesk.message.dto.AttachmentDTO;
-import com.binhbkfx02295.cshelpdesk.message.service.MessageServiceImpl;
+import com.binhbkfx02295.cshelpdesk.message.service.MessageService;
 import com.binhbkfx02295.cshelpdesk.ticket_management.progress_status.mapper.ProgressStatusMapper;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.TicketDetailDTO;
-import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.service.TicketServiceImpl;
+import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.service.TicketService;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.message.dto.MessageDTO;
 import com.binhbkfx02295.cshelpdesk.webhook.dto.WebHookEventDTO;
@@ -31,8 +31,8 @@ public class WebHookServiceImpl implements WebHookService {
 
     private final FacebookUserService facebookUserService;
     private final FacebookGraphAPIService facebookGraphAPIService;
-    private final TicketServiceImpl ticketService;
-    private final MessageServiceImpl messageService;
+    private final TicketService ticketService;
+    private final MessageService messageService;
     private final FacebookAPIProperties properties;
     private final FacebookUserMapper facebookUserMapper;
     private final ProgressStatusMapper progressStatusMapper;
@@ -50,66 +50,41 @@ public class WebHookServiceImpl implements WebHookService {
                 String recipient = messaging.getRecipient().getId();
                 boolean isSenderEmployee = senderId.equalsIgnoreCase(properties.getPageId());
                 FacebookUserDetailDTO facebookUser;
-                MessageDTO messageDTO;
+                TicketDetailDTO ticket;
+                facebookUser = getOrCreateFacebookUser(isSenderEmployee ? recipient : senderId);
+                ticket = getOrCreateTicket(facebookUser, isSenderEmployee);
+                if (ticket != null) {
+                    messageService.addMessage(convertToMessageDTO(messaging, ticket));
 
-                //if sender is employee => get existing ticket, if any -> add message
-                if (isSenderEmployee) {
-                    APIResultSet<TicketDetailDTO> result = ticketService.findExistingTicket(recipient);
-
-                    if (result.isSuccess()) {
-                        TicketDetailDTO ticket = result.getData();
-                        if (ticket.getAssignee() == null) {
-                            if (autoAssign(ticket)) {
-                                ticketService.assignTicket(ticket.getId(), ticket);
-                            }
-
-                        }
-                        messageDTO = convertToMessageDTO(messaging);
-                        messageDTO.setSenderSystem(ticket.getAssignee() == null);
-                        messageDTO.setTicketId(ticket.getId());
-                        messageService.addMessage(messageDTO);
-                    }
-                } else { // if sender is customer, get existing ticket, if any-> add message, else create.
-                    APIResultSet<TicketDetailDTO> result = ticketService.findExistingTicket(senderId);
-                    TicketDetailDTO ticket;
-                    if (result.isSuccess() && result.getData().getProgressStatus().getId() != 3) {
-                        ticket = result.getData();
-                        if (ticket.getAssignee() == null) {
-                            if (autoAssign(ticket)) {
-                                ticketService.assignTicket(ticket.getId(), ticket);
-                            }
-                        }
-                    } else {
-                        //if no existign ticket, create, assign, add message -> save ticket to database;
-                        facebookUser = getOrCreateFacebookUser(senderId);
-                        ticket = new TicketDetailDTO();
-                        ticket.setProgressStatus(progressStatusMapper.toDTO(cache.getProgress(1)));
-                        ticket.setFacebookUser(facebookUserMapper.toDTO(facebookUser));
-
+                    if (ticket.getAssignee() == null && !isSenderEmployee) {
                         if (!autoAssign(ticket)) {
                             facebookGraphAPIService.notifyNoAssignee(senderId);
+                        } else {
+                            ticketService.assignTicket(ticket.getId(), ticket);
                         }
-
-                        ticket = ticketService.createTicket(ticket).getData();
-                    }
-                    messageDTO = convertToMessageDTO(messaging);
-                    messageDTO.setTicketId(ticket.getId());
-                    messageDTO.setSenderSystem(false);
-                    messageService.addMessage(messageDTO);
-
-                    if (ticket.getAssignee() == null) {
-                        facebookGraphAPIService.notifyNoAssignee(senderId);
                     }
                 }
             }
         }
     }
 
-    private FacebookUserDetailDTO getOrCreateFacebookUser(String facebookId) {
-        //if sender is employee - skip
-        if (facebookId.equalsIgnoreCase(properties.getPageId())) {
+    private TicketDetailDTO getOrCreateTicket(FacebookUserDetailDTO facebookUser, boolean isSenderEmployee) {
+        APIResultSet<TicketDetailDTO> result = ticketService.findExistingTicket(facebookUser.getFacebookId());
+        if (result.isSuccess() && result.getData().getProgressStatus().getId() != 3) {
+            return result.getData();
+        }
+        if (isSenderEmployee) {
             return null;
         }
+        TicketDetailDTO ticket = new TicketDetailDTO();
+        ticket.setFacebookUser(facebookUserMapper.toDTO(facebookUser));
+        ticket.setProgressStatus(progressStatusMapper.toDTO(cache.getProgress(1)));
+        autoAssign(ticket);
+        APIResultSet<TicketDetailDTO> saved = ticketService.createTicket(ticket);
+        return saved.getData();
+    }
+
+    private FacebookUserDetailDTO getOrCreateFacebookUser(String facebookId) {
         //check if exists
         APIResultSet<FacebookUserDetailDTO> existing = facebookUserService.get(facebookId);
         if (existing.getHttpCode() == 200) return existing.getData();
@@ -122,7 +97,7 @@ public class WebHookServiceImpl implements WebHookService {
     }
 
 
-    private MessageDTO convertToMessageDTO(WebHookEventDTO.Messaging messaging) {
+    private MessageDTO convertToMessageDTO(WebHookEventDTO.Messaging messaging, TicketDetailDTO ticket) {
         MessageDTO message = new MessageDTO();
         message.setText(messaging.getMessage().getText());
         message.setSenderEmployee(messaging.getSender().getId().equalsIgnoreCase(properties.getPageId()));
@@ -137,10 +112,15 @@ public class WebHookServiceImpl implements WebHookService {
                 message.getAttachments().add(attachment1);
             }
         }
+        message.setTicketId(ticket.getId());
+        message.setSenderSystem(ticket.getAssignee() == null && messaging.getSender().getId().equalsIgnoreCase(properties.getPageId()));
         return message;
     }
 
     private boolean autoAssign(TicketDetailDTO ticket) {
+        if (ticket.getAssignee() != null) {
+            return true;
+        }
         //get employees with role staff and is online
         List<Employee> employeeList = cache.getAllEmployees().values().stream().filter(employee -> {
             return employee.getStatusLogs().get(employee.getStatusLogs().size()-1).getStatus().getId() == 1 &&

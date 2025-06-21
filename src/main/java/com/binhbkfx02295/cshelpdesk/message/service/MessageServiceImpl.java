@@ -6,7 +6,6 @@ import com.binhbkfx02295.cshelpdesk.message.entity.Message;
 import com.binhbkfx02295.cshelpdesk.message.mapper.MessageMapper;
 import com.binhbkfx02295.cshelpdesk.message.repository.MessageRepository;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.entity.Ticket;
-import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.repository.TicketRepository;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.websocket.event.MessageEvent;
 import jakarta.persistence.EntityManager;
@@ -16,7 +15,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,7 +39,6 @@ public class MessageServiceImpl implements MessageService {
             entityManager.clear();
             cache.putMessage(messageRepository.findById(saved.getId()).get());
             cache.getTicket(messageDTO.getTicketId()).getMessages().add(saved);
-            //TODO: publish event
             publisher.publishEvent(new MessageEvent(mapper.toEventDTO(cache.getMessage(saved.getId()))));
             result = APIResultSet.ok(MSG_ADD_MESSAGE_SUCCESS, mapper.toDTO(cache.getMessage(saved.getId())));
         } catch (Exception e) {

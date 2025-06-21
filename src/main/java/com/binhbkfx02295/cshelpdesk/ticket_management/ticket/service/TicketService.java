@@ -12,7 +12,8 @@ import java.util.Set;
 
 
 public interface TicketService {
-
+    String MSG_SUCCESS_GET_TICKET = "Truy vấn ticket thành công.";
+    String MSG_ERROR_GET_TICKET_NOT_FOUND = "Không tìm thấy ticket";
     String MSG_ERROR_VALIDATION_NO_FACEBOOK_ID = "Lỗi thiếu Facebook User ID";
     String MSG_ERROR_VALIDATION_EMPLOYEE_NOT_EXISTS = "Lỗi nhân viên không tồn tại";
     String MSG_ERROR_VALIDATION_NO_PROGRESS_STATUS = "Lỗi thiếu trình trạng xử lý";

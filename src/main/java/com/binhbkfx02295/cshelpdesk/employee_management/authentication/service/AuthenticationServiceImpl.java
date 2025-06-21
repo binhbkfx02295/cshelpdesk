@@ -1,6 +1,7 @@
 package com.binhbkfx02295.cshelpdesk.employee_management.authentication.service;
 
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.EmployeeMapper;
+import com.binhbkfx02295.cshelpdesk.employee_management.employee.service.EmployeeService;
 import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginRequestDTO;
 import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginResponseDTO;
@@ -13,6 +14,7 @@ import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.StatusLo
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.repository.EmployeeRepository;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.repository.StatusLogRepository;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
+import com.binhbkfx02295.cshelpdesk.infrastructure.util.PasswordValidator;
 import com.binhbkfx02295.cshelpdesk.websocket.event.EmployeeEvent;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +50,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (validation.hasErrors()) {
             response = new LoginResponseDTO();
             response.setValidationResult(validation);
-            return APIResultSet.badRequest(messageSource.getMessage("auth.input.invalid", null, locale), response);
+            return APIResultSet.badRequest(messageSource.getMessage("auth.invalid.credentials", null, locale), response);
         }
         Optional<Employee> employeeOpt = employeeRepository.findWithUserGroupAndPermissionsByUsername(request.getUsername());
         if (employeeOpt.isEmpty()) {
@@ -70,9 +72,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         }
         employee.setFailedLoginCount(0);
-        response = new LoginResponseDTO();
-        EmployeeDTO employeeDTO = employeeMapper.toDTO(employee);
-        response.setEmployeeDTO(employeeDTO);
+
         statusLogRepository.findFirstByEmployee_UsernameOrderByTimestampDesc( employee.getUsername()).ifPresentOrElse(
                 statusLog -> {
 
@@ -89,20 +89,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             Status status = cache.getStatus(1);
             newLog.setStatus(status);
             newLog.setEmployee(employee);
-
             employee.getStatusLogs().add(newLog);
         });
         employeeRepository.save(employee);
         entityManager.flush();
         entityManager.clear();
         cache.updateAllEmployees();
+        response = new LoginResponseDTO();
+        EmployeeDTO employeeDTO = employeeMapper.toDTO(cache.getEmployee(employee.getUsername()));
+        response.setEmployeeDTO(employeeDTO);
+        publisher.publishEvent(new EmployeeEvent(EmployeeEvent.Action.UPDATED, employeeMapper.toDashboardDTO(cache.getEmployee(employee.getUsername()))));
+
         return APIResultSet.ok(messageSource.getMessage("auth.login.success", null, locale), response);
     }
 
     @Override
     @Transactional
     public APIResultSet<Void> logout(EmployeeDTO employeeDTO) {
-        String username = employeeDTO.getUsername();
         Optional<Employee> employeeOpt = employeeRepository.findWithAllStatusLog(employeeDTO.getUsername());
 
         if (employeeOpt.isPresent()) {
@@ -118,11 +121,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 employeeRepository.saveAndFlush(employee);
                 entityManager.flush();
                 entityManager.clear();
-                //TODO: phong event
                 cache.updateAllEmployees();
 
                 publisher.publishEvent(new EmployeeEvent(EmployeeEvent.Action.UPDATED,
-                        employeeMapper.toDTO(cache.getEmployee(employee.getUsername()))));
+                        employeeMapper.toDashboardDTO(cache.getEmployee(employee.getUsername()))));
             }
         }
         return APIResultSet.ok(messageSource.getMessage("auth.logout.success", null, locale), null);

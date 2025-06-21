@@ -2,6 +2,8 @@ package com.binhbkfx02295.cshelpdesk.employee_management.employee.entity;
 
 import com.binhbkfx02295.cshelpdesk.employee_management.usergroup.UserGroup;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -15,6 +17,8 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Employee {
 
     private String name;
@@ -41,5 +45,8 @@ public class Employee {
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StatusLog> statusLogs = new ArrayList<>();
 
-
+    @Override
+    public String toString() {
+        return "Employee{}";
+    }
 }

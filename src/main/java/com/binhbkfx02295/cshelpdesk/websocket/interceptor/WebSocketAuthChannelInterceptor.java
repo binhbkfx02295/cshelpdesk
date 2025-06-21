@@ -20,9 +20,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
-
-    private final AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
-
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);

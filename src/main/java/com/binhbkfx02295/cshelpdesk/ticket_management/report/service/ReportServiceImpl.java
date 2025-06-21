@@ -21,34 +21,30 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
 
+
     private final TicketService ticketService;
 
     @Override
     public APIResultSet<Report> fetchHourlyReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
         try {
-
-            // 1. Lấy data từ service
             APIResultSet<List<TicketVolumeReportDTO>> resultSet = ticketService.searchTicketsForVolumeReport(
                     new Timestamp(fromTime),
                     new Timestamp(toTime)
             );
-
             if (!resultSet.isSuccess()) {
-                return APIResultSet.internalError("Không thể tạo báo cáo: " + resultSet.getMessage());
+                return APIResultSet.internalError(MSG_FAILED_TICKET_FAIL);
             }
 
-            // 2. Convert millis sang LocalDate (giữ đúng zone cho VN)
             ZoneId zone = ZoneId.of(timezone);
             LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
             LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
 
-            // 3. Truyền fromDate, toDate vào hàm toHourlyReport đã chuẩn hóa
             Report report = toHourlyReport(resultSet.getData(), fromDate, toDate, type, label, main, zone);
-            return APIResultSet.ok("Tạo báo cáo thành công", report);
+            return APIResultSet.ok(MSG_SUCCESS_CREATE_REPORT, report);
 
         } catch (Exception e) {
-            log.error("Lỗi khi tạo báo cáo hourly", e);
-            return APIResultSet.internalError("Lỗi hệ thống khi tạo báo cáo hourly");
+            log.error(MSG_FAILED_CREATE_REPORT, e);
+            return APIResultSet.internalError(MSG_FAILED_CREATE_REPORT);
         }
     }
 
@@ -66,16 +62,16 @@ public class ReportServiceImpl implements ReportService {
             );
 
             if (!resultSet.isSuccess()) {
-                result = APIResultSet.internalError("Không thể tạo báo cáo: " + resultSet.getMessage());
+                result = APIResultSet.internalError(MSG_FAILED_TICKET_FAIL);
             } else {
                 Report report = toWeekdayReport(resultSet.getData(), fromDate, toDate, type, label, main, zone);
-                result = APIResultSet.ok("Tạo báo cáo thành công", report);
+                result = APIResultSet.ok(MSG_SUCCESS_CREATE_REPORT, report);
             }
 
 
         } catch (Exception e) {
-            log.error("Lỗi khi tạo báo cáo Week day", e);
-            result = APIResultSet.internalError("Lỗi hệ thống khi tạo báo cáo Week day");
+            log.error(MSG_FAILED_CREATE_REPORT, e);
+            return APIResultSet.internalError(MSG_FAILED_CREATE_REPORT);
         }
         return result;
     }
@@ -95,16 +91,15 @@ public class ReportServiceImpl implements ReportService {
             );
 
             if (!resultSet.isSuccess()) {
-                log.warn("Failed to fetch ticket data: {}", resultSet.getMessage());
-                result = APIResultSet.internalError("Không thể tạo báo cáo: " + resultSet.getMessage());
+                result = APIResultSet.internalError(MSG_FAILED_TICKET_FAIL);
             } else {
                 Report report = toDailyReport(resultSet.getData(), fromDate, toDate, type, label, main, zone);
-                result= APIResultSet.ok("Tạo báo cáo thành công", report);
+                result= APIResultSet.ok(MSG_SUCCESS_CREATE_REPORT, report);
             }
 
         } catch (Exception e) {
-            log.error("Lỗi khi tạo báo cáo Day in Month", e);
-            result = APIResultSet.internalError("Lỗi hệ thống khi tạo báo cáo Day in Month");
+            log.error(MSG_FAILED_CREATE_REPORT, e);
+            return APIResultSet.internalError(MSG_FAILED_CREATE_REPORT);
         }
         return result;
     }
@@ -178,7 +173,7 @@ public class ReportServiceImpl implements ReportService {
         int[] weekdays = new int[7];
         int[] weekdayAppearance = new int[7];
         for (int i=0; i < dayBetween; i++) {
-            weekdayAppearance[fromDate.plusDays(i).getDayOfWeek().getValue()-1]++;
+            weekdayAppearance[fromDate.plusDays(i).getDayOfWeek().getValue() - 1]++;
         }
         for (TicketVolumeReportDTO ticket : data) {
             int weekday = ticket.getCreatedAt().toInstant().atZone(zone).getDayOfWeek().getValue() - 1;
@@ -188,11 +183,11 @@ public class ReportServiceImpl implements ReportService {
         int totalTickets = Arrays.stream(weekdays).sum();
         List<Double> averageByDay = new ArrayList<>(7);
         for (int i = 0; i < 7; i++) {
-            averageByDay.add(dayBetween > 0 ? (double) weekdays[i] / weekdayAppearance[i] : 0.0);
+            averageByDay.add(weekdayAppearance[i] > 0 ? (double) weekdays[i] / weekdayAppearance[i] : 0.0);
         }
 
 
-        List<String> labels = List.of("Thu 2",
+        List<String> labels = List.of("Thứ 2",
                 "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật");
         Report.Dataset dataset = Report.Dataset.builder()
                 .label(label)
@@ -212,7 +207,7 @@ public class ReportServiceImpl implements ReportService {
         summary.put("max", Map.of("value", max, "day", averageByDay.indexOf(max)));
         summary.put("min", Map.of("value", min, "day", averageByDay.indexOf(min)));
         summary.put("totalDay", dayBetween);
-
+        log.info("{}", summary);
         List<Object> rows = new ArrayList<>(7);
         for (int h = 0; h < 7; h++) {
             double value = totalTickets > 0 ? (double) weekdays[h]*100 / totalTickets : 0.0;

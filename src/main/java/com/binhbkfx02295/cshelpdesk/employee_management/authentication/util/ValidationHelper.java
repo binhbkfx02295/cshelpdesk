@@ -14,6 +14,7 @@ public class ValidationHelper {
 
     public ValidationResult validateLoginInput(String username, String password, Locale locale) {
         ValidationResult result = new ValidationResult();
+        System.out.println("hello");
 
         if (username == null || !username.matches(ValidationConstants.USERNAME_PATTERN)) {
             String msg = messageSource.getMessage("validation.username.invalid", null, locale);

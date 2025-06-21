@@ -91,12 +91,16 @@ public class FacebookUserServiceImpl implements FacebookUserService {
         APIResultSet<List<FacebookUserListDTO>> result;
         try {
             result = Optional.ofNullable(facebookUserRepository.getAll())
-                    .map(users -> APIResultSet.ok(MSG_SUCCESS_GET_ALL_FACEBOOK_USER, users.stream().map(mapper::toListDTO).toList()))
+                    .map(users -> APIResultSet.ok(MSG_SUCCESS_GET_ALL_FACEBOOK_USER,
+                            users.stream()
+                                    .sorted((o1, o2) -> (int)o2.getCreatedAt().toEpochMilli() - (int)o1.getCreatedAt().toEpochMilli())
+                                    .map(mapper::toListDTO)
+                                    .toList()))
                     .orElseGet(() -> APIResultSet.notFound(MSG_ERROR_GET_ALL_FACEBOOK_USER));
 
         } catch (Exception e) {
             log.error("Error message", e);
-            result = APIResultSet.internalError(e.getMessage());
+            result = APIResultSet.internalError();
         }
         return result;
     }
@@ -154,8 +158,7 @@ public class FacebookUserServiceImpl implements FacebookUserService {
     public APIResultSet<Void> deleteAll(ArrayList<String> ids) {
         try {
             facebookUserRepository.deleteAll(ids);
-            APIResultSet<Void> result = APIResultSet.ok(MSG_ERROR_DELETE_FACEBOOK_USERS, null);
-            return result;
+            return APIResultSet.ok(MSG_ERROR_DELETE_FACEBOOK_USERS, null);
         } catch (Exception e) {
             log.error("Error message", e);
             return APIResultSet.internalError();
@@ -168,8 +171,7 @@ public class FacebookUserServiceImpl implements FacebookUserService {
         try {
             Map<String, Object> queryResult = facebookUserRepository.search(criteria, pageable);
             if (queryResult.get("content") != null) {
-                List<FacebookUserExportDTO> content = ((List<FacebookUser>)queryResult.get("content")).stream().map(mapper::toExportDTO).toList();
-                return content;
+                return ((List<FacebookUser>)queryResult.get("content")).stream().map(mapper::toExportDTO).toList();
             }
         } catch (Exception e) {
             log.error("Error message", e);

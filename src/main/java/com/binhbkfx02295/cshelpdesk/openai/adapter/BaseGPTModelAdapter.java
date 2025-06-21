@@ -186,6 +186,6 @@ public abstract class BaseGPTModelAdapter implements GPTModelAdapter {
 
         OpenAIResponse jsonResult = getOpenAIResponse(getModelSettings(), prompt);
         return jsonResult.getChoices().get(0).getMessage().getContent();
-    };
+    }
 
 }

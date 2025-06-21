@@ -5,7 +5,6 @@ import com.binhbkfx02295.cshelpdesk.facebookgraphapi.dto.FacebookTokenResponseDT
 import com.binhbkfx02295.cshelpdesk.facebookgraphapi.dto.FacebookUserProfileDTO;
 import com.binhbkfx02295.cshelpdesk.facebookgraphapi.entity.FacebookToken;
 import com.binhbkfx02295.cshelpdesk.facebookgraphapi.repository.FacebookTokenRepository;
-import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserFetchDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
