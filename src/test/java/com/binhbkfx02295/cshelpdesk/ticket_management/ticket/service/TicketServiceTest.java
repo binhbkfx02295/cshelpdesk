@@ -50,16 +50,21 @@ class TicketServiceTest {
 
     private static final TicketSearchCriteria BASE_CRITERIA = new TicketSearchCriteria();
 
-    @Mock TicketRepository          ticketRepo;
-    @Mock TicketMapper              mapper;
-    @Mock MasterDataCache           cache;
-    @Mock ApplicationEventPublisher publisher;
+    @Mock
+    TicketRepository ticketRepo;
+    @Mock
+    TicketMapper mapper;
+    @Mock
+    MasterDataCache cache;
+    @Mock
+    ApplicationEventPublisher publisher;
     @Mock
     FacebookUserServiceImpl facebookUserService;
     @Mock
     EntityManager entityManager;
 
-    @InjectMocks TicketServiceImpl service;
+    @InjectMocks
+    TicketServiceImpl service;
 
     @BeforeAll
     static void beforeAll() {
@@ -184,8 +189,10 @@ class TicketServiceTest {
         ticketDTO.getFacebookUser().setFacebookId("99999");
         ticketDTO.getAssignee().setUsername("binhbk");
         when(cache.getEmployee("binhbk")).thenReturn(new Employee());
-        when(cache.getCategory(ticketDTO.getProgressStatus().getId())).thenReturn(new Category());
-        when(cache.getProgress(ticketDTO.getProgressStatus().getId())).thenReturn(new ProgressStatus());
+        when(cache.getCategory(ticketDTO.getProgressStatus().getId()))
+                .thenReturn(new Category());
+        when(cache.getProgress(ticketDTO.getProgressStatus().getId()))
+                .thenReturn(new ProgressStatus());
         when(facebookUserService.existsById(ticketDTO.getFacebookUser().getFacebookId()))
                 .thenReturn(APIResultSet.notFound("Khách hàng không tồn tại"));
         APIResultSet<TicketDetailDTO> result = service.createTicket(ticketDTO);
@@ -331,7 +338,7 @@ class TicketServiceTest {
         assertEquals("Truy vấn ticket thành công.", result.getMessage());
         verify(ticketRepo).findByIdWithDetails(1);
     }
-    
+
     @Test
     void getForDashboard() {
         Employee employee = new Employee();
@@ -340,7 +347,7 @@ class TicketServiceTest {
         employee.setUserGroup(group);
         employee.setUsername("binhbk");
 
-        when(cache.getDashboardTickets()).thenReturn(new HashMap<Integer,Ticket>());
+        when(cache.getDashboardTickets()).thenReturn(new HashMap<Integer, Ticket>());
         when(cache.getEmployee("binhbk")).thenReturn(employee);
         APIResultSet<List<TicketDashboardDTO>> result = service.getForDashboard("binhbk");
         assertEquals(200, result.getHttpCode());

@@ -10,6 +10,7 @@ import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,17 +26,20 @@ public class EmployeeController {
     private final MasterDataCache cache;
 
 
+    @PreAuthorize("hasRole('SUPERVISOR')")
     @PostMapping
     public ResponseEntity<APIResultSet<EmployeeDTO>> createUser(@RequestBody EmployeeDTO employeeDTO) {
 
         return APIResponseEntityHelper.from(employeeService.createUser(employeeDTO));
     }
 
+    @PreAuthorize("hasRole('SUPERVISOR')")
     @GetMapping("")
     public ResponseEntity<APIResultSet<EmployeeDTO>> getUserByUsername(@RequestParam(value = "username", required = false) String username) {
         return APIResponseEntityHelper.from(employeeService.getUserByUsername(username));
     }
 
+    @PreAuthorize("hasRole('SUPERVISOR')")
     @GetMapping("/get-all-user")
     public ResponseEntity<APIResultSet<List<EmployeeDTO>>> getAllUsers() {
         return APIResponseEntityHelper.from(employeeService.getAllUsers());
@@ -60,6 +64,7 @@ public class EmployeeController {
         return APIResponseEntityHelper.from(employeeService.updateUser(user.getUsername(), employeeDTO));
     }
 
+    @PreAuthorize("hasRole('SUPERVISOR')")
     @PutMapping
     public ResponseEntity<APIResultSet<EmployeeDetailDTO>> updateUser(
             @RequestBody EmployeeDTO dto
@@ -98,6 +103,7 @@ public class EmployeeController {
         return APIResponseEntityHelper.from(employeeService.updateOnlineStatus(logDTO));
     }
 
+    @PreAuthorize("hasRole('SUPERVISOR')")
     @PutMapping("/reset-password")
     public ResponseEntity<APIResultSet<Void>> resetPassword(
             @RequestBody ResetPasswordDTO resetPasswordDTO
@@ -105,6 +111,7 @@ public class EmployeeController {
         return APIResponseEntityHelper.from(employeeService.resetPassword(resetPasswordDTO));
     }
 
+    @PreAuthorize("hasRole('SUPERVISOR')")
     @DeleteMapping()
     public ResponseEntity<APIResultSet<Void>> deleteUser(
             @RequestBody EmployeeDTO employeeDTO

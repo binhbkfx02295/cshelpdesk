@@ -10,6 +10,7 @@ import com.binhbkfx02295.cshelpdesk.ticket_management.performance.service.Criter
 import com.binhbkfx02295.cshelpdesk.ticket_management.performance.service.PerformanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZoneId;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/performance")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('SUPERVISOR')")
 public class PerformanceController {
 
     private final PerformanceService performanceService;

@@ -54,7 +54,6 @@ public class TicketController {
 
     @PutMapping("/{ticketId}/note")
     public ResponseEntity<APIResultSet<Void>> addNote(@PathVariable int ticketId, @RequestBody NoteDTO noteDto) {
-        System.out.println("Path varialbe " + ticketId);
         return APIResponseEntityHelper.from(ticketService.addNoteToTicket(ticketId, noteDto));
     }
 
