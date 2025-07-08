@@ -7,6 +7,7 @@ import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.Employee
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.EmployeeMapper;
 import com.binhbkfx02295.cshelpdesk.facebookuser.entity.FacebookUser;
 import com.binhbkfx02295.cshelpdesk.facebookuser.mapper.FacebookUserMapper;
+import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.message.dto.MessageDTO;
 import com.binhbkfx02295.cshelpdesk.message.entity.Message;
 import com.binhbkfx02295.cshelpdesk.ticket_management.category.entity.Category;
@@ -51,7 +52,7 @@ public class TicketMapper {
     private final SatisfactionRepository satisfactionRepository;
     private final EmployeeRepository employeeRepository;
     private final ProgressStatusRepository progressStatusRepository;
-    private final FacebookUserRepository facebookUserRepository;
+    private final MasterDataCache cache;
 
     public TicketListDTO toListDTO(Ticket ticket) {
         if (ticket == null) return null;
@@ -127,41 +128,42 @@ public class TicketMapper {
         // 3. Assignee (username)
         if (dto.getAssignee() != null && (entity.getAssignee() == null ||
                 !dto.getAssignee().getUsername().equals(entity.getAssignee().getUsername()))) {
-            Employee assignee = employeeRepository.getReferenceById(dto.getAssignee().getUsername());
+            Employee assignee = cache.getEmployee(dto.getAssignee().getUsername());
             entity.setAssignee(assignee);
         }
 
         // 4. ProgressStatus (name hoặc code)
         if (dto.getProgressStatus().getId() != (entity.getProgressStatus().getId())) {
-            ProgressStatus status = progressStatusRepository.getReferenceById(dto.getProgressStatus().getId());
+            ProgressStatus status = cache.getProgress(dto.getProgressStatus().getId());
             entity.setProgressStatus(status);
         }
 
         // 5. Category (name)
         if (dto.getCategory() != null && (entity.getCategory() == null ||
                 dto.getCategory().getId() != (entity.getCategory().getId()))) {
-            Category category = categoryRepository.getReferenceById(dto.getCategory().getId());
+            Category category = cache.getCategory(dto.getCategory().getId());
             entity.setCategory(category);
         }
 
         // 6. Emotion (by ID)
         if (dto.getEmotion() != null && (entity.getEmotion() == null ||
                 dto.getEmotion().getId() != entity.getEmotion().getId())) {
-            Emotion emotion = emotionRepository.getReferenceById(dto.getEmotion().getId());
+            Emotion emotion = cache.getEmotion(dto.getEmotion().getId());
             entity.setEmotion(emotion);
         }
 
         // 7. Satisfaction (by score)
         if (dto.getSatisfaction() != null && (entity.getSatisfaction() == null ||
                 dto.getSatisfaction().getId() != entity.getSatisfaction().getId())) {
-            Satisfaction satisfaction = satisfactionRepository.getReferenceById(dto.getSatisfaction().getId());
+            Satisfaction satisfaction = cache.getSatisfaction(dto.getSatisfaction().getId());
             entity.setSatisfaction(satisfaction);
         }
 
         // 8. FacebookUser (by facebookId)
         if (dto.getFacebookUser() != null && (entity.getFacebookUser() == null ||
                 !dto.getFacebookUser().getFacebookId().equals(entity.getFacebookUser().getFacebookId()))) {
-            FacebookUser fb = facebookUserRepository.getReferenceById(dto.getFacebookUser().getFacebookId());
+            FacebookUser fb = FacebookUser.builder()
+                    .facebookId(dto.getFacebookUser().getFacebookId()).build();
             entity.setFacebookUser(fb);
         }
 
