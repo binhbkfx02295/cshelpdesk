@@ -104,11 +104,11 @@ public class TicketMapper {
         Ticket ticket = new Ticket();
 
         ticket.setTitle(dto.getTitle());
-        ticket.setAssignee(dto.getAssignee() != null ? employeeRepository.getReferenceById(dto.getAssignee().getUsername()) : null);
-        ticket.setProgressStatus(progressStatusRepository.getReferenceById(dto.getProgressStatus().getId()));
-        ticket.setCategory(dto.getCategory() != null ? categoryRepository.getReferenceById(dto.getCategory().getId()) : null);
-        ticket.setEmotion(dto.getEmotion() != null ? emotionRepository.getReferenceById(dto.getEmotion().getId()) : null);
-        ticket.setSatisfaction(dto.getSatisfaction() != null ? satisfactionRepository.getReferenceById(dto.getSatisfaction().getId()) : null);
+        ticket.setAssignee(cache.getEmployee(dto.getAssignee().getUsername()));
+        ticket.setProgressStatus(cache.getProgress(dto.getProgressStatus().getId()));
+        ticket.setCategory(dto.getCategory() == null ? null : cache.getCategory(dto.getCategory().getId()));
+        ticket.setEmotion(dto.getEmotion() == null ? null : cache.getEmotion(dto.getEmotion().getId()));
+        ticket.setSatisfaction(dto.getSatisfaction() == null ? null : cache.getSatisfaction(dto.getSatisfaction().getId()));
         if (dto.getFacebookUser() != null) {
             FacebookUser facebookUser = new FacebookUser();
             facebookUser.setFacebookId(dto.getFacebookUser().getFacebookId());

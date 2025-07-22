@@ -69,6 +69,7 @@ public class EmployeeController {
     public ResponseEntity<APIResultSet<EmployeeDetailDTO>> updateUser(
             @RequestBody EmployeeDTO dto
     ) {
+        log.info(dto.toString());
         return APIResponseEntityHelper.from(employeeService.updateUser(dto.getUsername(), dto));
     }
 
