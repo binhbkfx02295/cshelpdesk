@@ -25,14 +25,6 @@ public class EmployeeController {
     private final EmployeeServiceImpl employeeService;
     private final MasterDataCache cache;
 
-
-    @PreAuthorize("hasRole('SUPERVISOR')")
-    @PostMapping
-    public ResponseEntity<APIResultSet<EmployeeDTO>> createUser(@RequestBody EmployeeDTO employeeDTO) {
-
-        return APIResponseEntityHelper.from(employeeService.createUser(employeeDTO));
-    }
-
     @PreAuthorize("hasRole('SUPERVISOR')")
     @GetMapping("")
     public ResponseEntity<APIResultSet<EmployeeDTO>> getUserByUsername(@RequestParam(value = "username", required = false) String username) {
@@ -56,6 +48,27 @@ public class EmployeeController {
             @AuthenticationPrincipal UserPrincipal user) {
         return APIResponseEntityHelper.from(APIResultSet.ok("OK", user));
     }
+
+    @GetMapping("/me/online-status")
+    public ResponseEntity<APIResultSet<StatusLogDTO>> getOnlineStatus(
+            @AuthenticationPrincipal UserPrincipal user) {
+        return APIResponseEntityHelper.from(employeeService.getLatestOnlineStatus(user.getUsername()));
+    }
+
+    @GetMapping("/me/update-cache")
+    public ResponseEntity<APIResultSet<StatusLogDTO>> updatecache(
+            @AuthenticationPrincipal UserPrincipal user) {
+        cache.updateAllEmployees();
+        return APIResponseEntityHelper.from(employeeService.getLatestOnlineStatus(user.getUsername()));
+    }
+
+    @PreAuthorize("hasRole('SUPERVISOR')")
+    @PostMapping
+    public ResponseEntity<APIResultSet<EmployeeDTO>> createUser(@RequestBody EmployeeDTO employeeDTO) {
+
+        return APIResponseEntityHelper.from(employeeService.createUser(employeeDTO));
+    }
+
 
     @PutMapping("/me")
     public ResponseEntity<APIResultSet<EmployeeDetailDTO>> updateProfile(
@@ -81,19 +94,6 @@ public class EmployeeController {
                 user.getUsername(),
                 changePasswordDTO.getPassword(),
                 changePasswordDTO.getNewPassword()));
-    }
-
-    @GetMapping("/me/online-status")
-    public ResponseEntity<APIResultSet<StatusLogDTO>> getOnlineStatus(
-            @AuthenticationPrincipal UserPrincipal user) {
-        return APIResponseEntityHelper.from(employeeService.getLatestOnlineStatus(user.getUsername()));
-    }
-
-    @GetMapping("/me/update-cache")
-    public ResponseEntity<APIResultSet<StatusLogDTO>> updatecache(
-            @AuthenticationPrincipal UserPrincipal user) {
-        cache.updateAllEmployees();
-        return APIResponseEntityHelper.from(employeeService.getLatestOnlineStatus(user.getUsername()));
     }
 
     @PutMapping("/me/online-status")

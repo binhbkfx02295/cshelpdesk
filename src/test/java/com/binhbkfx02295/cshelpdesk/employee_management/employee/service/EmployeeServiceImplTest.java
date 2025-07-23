@@ -120,7 +120,7 @@ class EmployeeServiceImplTest {
     @Test
     void testUpdateUser_internalError_failed() {
         EmployeeDTO employeeDTO = mockEmployeeDTO();
-        when(cache.getEmployee(anyString())).thenReturn(new Employee());
+        when(cache.getEmployee(anyString())).thenReturn(Employee.builder().userGroup(new UserGroup()).build());
         when(cache.getUserGroup(anyInt())).thenReturn(new UserGroup());
         when(employeeRepository.save(any(Employee.class))).thenThrow(new RuntimeException());
         APIResultSet<EmployeeDetailDTO> result = employeeService.updateUser(employeeDTO.getUsername(), employeeDTO);
@@ -132,7 +132,7 @@ class EmployeeServiceImplTest {
     void testUpdateUser_success() {
         EmployeeDTO employeeDTO = mockEmployeeDTO();
 
-        when(cache.getEmployee(anyString())).thenReturn(new Employee());
+        when(cache.getEmployee(anyString())).thenReturn(Employee.builder().userGroup(new UserGroup()).build());
         when(cache.getUserGroup(anyInt())).thenReturn(new UserGroup());
         when(employeeRepository.save(any(Employee.class))).thenReturn(new Employee());
         APIResultSet<EmployeeDetailDTO> result = employeeService.updateUser(employeeDTO.getUsername(), employeeDTO);

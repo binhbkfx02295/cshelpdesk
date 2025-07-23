@@ -72,6 +72,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 result = APIResultSet.ok(MSG_SUCCESS_CREATE_USER, mapper.toDTO(user));
 
             } catch (Exception e) {
+                log.error("Error message: ", e);
                 result = APIResultSet.internalError(MSG_ERROR_CREATE_USER);
             }
         }
@@ -86,7 +87,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             result = APIResultSet.notFound(MSG_ERROR_EMPLOYEE_NOT_EXIST);
         } else {
             try {
-                if (cache.getUserGroup(employeeDTO.getUserGroup().getGroupId()) == null) {
+                if (cache.getUserGroup(user.getUserGroup().getGroupId()) == null) {
                     return APIResultSet.badRequest(MSG_ERROR_USERGROUP_NOT_EXISTS);
                 }
                 mapper.mergeToUser(user, employeeDTO);
@@ -96,6 +97,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 cache.updateEmployee(saved);
                 result = APIResultSet.ok(MSG_SUCCESS_UPDATE_USER, mapper.toDetailDTO(cache.getEmployee(employeeDTO.getUsername())));
             } catch (Exception e) {
+                log.error("Error message: ", e);
                 result =  APIResultSet.internalError(MSG_ERROR_UPDATE_USER);
             }
         }
@@ -106,7 +108,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     public APIResultSet<EmployeeDTO> getUserByUsername(String username) {
         APIResultSet<EmployeeDTO> result;
         Employee employee = cache.getEmployee(username);
-
         if (employee == null) {
             result = APIResultSet.notFound(MSG_ERROR_GET_EMPLOYEE);
         } else {
@@ -122,13 +123,13 @@ public class EmployeeServiceImpl implements EmployeeService {
             List<Employee> result = cache.getAllEmployees().values().stream().toList();
             return APIResultSet.ok(MSG_SUCCESS_GET_ALL_EMPLOYEES, result.stream().map(mapper::toDTO).toList());
         } catch (Exception e) {
+            log.error("Error message: ", e);
             return APIResultSet.internalError();
         }
     }
 
     @Override
     public APIResultSet<Void> changePassword(String username, String password, String newPassword) {
-
         try {
             Optional<Employee> userOpt = employeeRepository.findById(username);
             if (userOpt.isEmpty()) return APIResultSet.badRequest(MSG_ERROR_WRONG_PASSWORD);
@@ -142,6 +143,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             employeeRepository.save(user);
             return APIResultSet.ok(MSG_OK_RESET_PASSWORD, null);
         } catch (Exception e) {
+            log.error("Error message: ", e);
             return APIResultSet.internalError();
         }
     }
@@ -164,6 +166,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             }
             result = APIResultSet.ok(MSG_SUCCESS_GET_ALL_EMPLOYEES, list.values().stream().toList());
         } catch (Exception e) {
+            log.error("Error message: ", e);
             result =  APIResultSet.internalError();
         }
         return result;
@@ -178,6 +181,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             );
             result = APIResultSet.ok(MSG_SUCCESS_GET_STATUS, statusLogMapper.toDTO(statusLog));
         } catch (Exception e) {
+            log.error("Error message: ", e);
             return APIResultSet.internalError();
         }
         return result;
@@ -186,7 +190,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public APIResultSet<Void> updateOnlineStatus(StatusLogDTO logDTO) {
-
         try {
             Optional<Employee> employeeOtp = employeeRepository.findWithTop1StatusLog(logDTO.getUsername());
             StatusLog latestLog;
@@ -209,6 +212,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 return APIResultSet.badRequest(MSG_ERROR_EMPLOYEE_NOT_EXIST, null);
             }
         } catch (Exception e) {
+            log.error("Error message: ", e);
             return APIResultSet.internalError();
         }
     }
@@ -225,6 +229,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             cache.getAllEmployees().remove(username);
             return APIResultSet.ok(MSG_SUCCESS_DELETE_EMPLOYEE, null);
         } catch (Exception e) {
+            log.error("Error message: ", e);
             return APIResultSet.internalError();
         }
 
@@ -248,6 +253,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 }
             }
         } catch (Exception e) {
+            log.error("Error message: ", e);
             result = APIResultSet.internalError();
         }
         return result;
