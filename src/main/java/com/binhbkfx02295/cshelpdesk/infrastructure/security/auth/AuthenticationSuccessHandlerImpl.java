@@ -22,9 +22,6 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
             throws IOException, ServletException {
         HttpSession session = request.getSession();
         session.removeAttribute("loginError");
-
-        log.info("Inside login success handler");
-//        // Redirect về dashboard
         response.sendRedirect("/today-staff");
 
     }

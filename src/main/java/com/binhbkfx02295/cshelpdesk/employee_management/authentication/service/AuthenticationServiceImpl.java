@@ -2,8 +2,8 @@ package com.binhbkfx02295.cshelpdesk.employee_management.authentication.service;
 
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.EmployeeMapper;
 import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginRequestDTO;
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginResponseDTO;
+import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginRequest;
+import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginResponse;
 import com.binhbkfx02295.cshelpdesk.employee_management.authentication.util.ValidationHelper;
 import com.binhbkfx02295.cshelpdesk.employee_management.authentication.util.ValidationResult;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.EmployeeDTO;
@@ -15,84 +15,60 @@ import com.binhbkfx02295.cshelpdesk.employee_management.employee.repository.Stat
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.websocket.event.EmployeeEvent;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.security.auth.login.AccountLockedException;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
-    private final Locale locale = Locale.forLanguageTag("vi");
     private final EmployeeRepository employeeRepository;
     private final StatusLogRepository statusLogRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ValidationHelper validationHelper;
-    private final MessageSource messageSource;
     private final MasterDataCache cache;
     private final EmployeeMapper employeeMapper;
-    private final EntityManager entityManager;
     private final ApplicationEventPublisher publisher;
 
     @Override
-    @Transactional
-    public APIResultSet<LoginResponseDTO> login(LoginRequestDTO request) {
-        LoginResponseDTO response;
-        //TODO: 1. validate LoginRequestDTO
-        ValidationResult validation = validate(request, locale);
-        if (validation.hasErrors()) {
-            response = new LoginResponseDTO();
-            response.setValidationResult(validation);
-            return APIResultSet.badRequest(messageSource.getMessage("auth.input.invalid", null, locale), response);
-        }
+    public LoginResponse login(LoginRequest request) throws AccountLockedException {
+        LoginResponse response;
 
+        Employee employee = employeeRepository.findWithUserGroupAndPermissionsByUsername(request.getUsername())
+                .orElseThrow(()-> new UsernameNotFoundException("Ten hoac mat khau khong chinh xac"));
 
-        //TODO: 2. find User
-        Optional<Employee> employeeOpt = employeeRepository.findWithUserGroupAndPermissionsByUsername(request.getUsername());
-        if (employeeOpt.isEmpty()) {
-            return APIResultSet.badRequest(messageSource.getMessage("auth.invalid.credentials", null, locale));
-        }
-
-
-        Employee employee = employeeOpt.get();
-
-        //TODO: 3a. tk bị khóa
         if (!employee.isActive()) {
-            return APIResultSet.forbidden(messageSource.getMessage("auth.account.locked", null, locale));
+            throw new AccountLockedException("Tai khoan bi khoa");
         }
-        log.info("đang đăng nhập ...");
-        //TODO: 3b. tk sai pass
         if (!passwordEncoder.matches(request.getPassword(), employee.getPassword())) {
-
             int failCount = employee.getFailedLoginCount() + 1;
             employee.setFailedLoginCount(failCount);
 
-
             if (failCount >= 5) {
                 employee.setActive(false);
-
             }
-
             employeeRepository.save(employee);
-            return APIResultSet.unauthorized(messageSource.getMessage("auth.invalid.credentials.remaining", new Object[]{5 - failCount}, locale));
+            throw new BadCredentialsException("Ten hoac mat khau khong chinh xac. Con " + (5 - failCount) +" lan dang nhap.");
 
         }
 
-        //TODO: 4. Đăng nhập thành công → reset đếm sai
-        employee.setFailedLoginCount(0);
 
-        //TODO: 5. Chuẩn bị LoginResponseDTO
-        response = new LoginResponseDTO();
+        employee.setFailedLoginCount(0);
+        response = new LoginResponse();
 
         EmployeeDTO employeeDTO = employeeMapper.toDTO(employee);
         response.setEmployeeDTO(employeeDTO);
-        //TODO: 6: nếu có sẵn status log thì không lưu nữa;
         statusLogRepository.findFirstByEmployee_UsernameOrderByTimestampDesc( employee.getUsername()).ifPresentOrElse(
                 statusLog -> {
 
@@ -114,48 +90,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             employee.getStatusLogs().add(newLog);
         });
         log.info(String.format("Login: saved new status log for %s", employee.getUsername()));
-        employeeRepository.save(employee);
-        entityManager.flush();
-        entityManager.clear();
-        cache.updateAllEmployees();
-        return APIResultSet.ok(messageSource.getMessage("auth.login.success", null, locale), response);
+
+        return response;
     }
 
     @Override
-    @Transactional
-    public APIResultSet<Void> logout(EmployeeDTO employeeDTO) {
-        String username = employeeDTO.getUsername();
-        log.info("finding logss for {}", username);
-        Optional<Employee> employeeOpt = employeeRepository.findWithAllStatusLog(employeeDTO.getUsername());
+    public void logout(EmployeeDTO employeeDTO) {
+        Employee employee = employeeRepository.findWithAllStatusLog(employeeDTO.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("Khong ton tai"));
 
-        if (employeeOpt.isPresent()) {
-            Employee employee = employeeOpt.get();
-            List<StatusLog> logs = employee.getStatusLogs();
-            StatusLog statusLog = logs.get(logs.size()-1);
-            if (statusLog.getStatus().getId() != 3) {
-                StatusLog newLog = new StatusLog();
-                Status status = cache.getStatus(3);
-                newLog.setStatus(status);
-                newLog.setEmployee(employee);
-                employee.getStatusLogs().add(newLog);
-                employeeRepository.saveAndFlush(employee);
-                log.info(String.format("%s log new status: %s", employeeDTO.getUsername(), status.getName()));
-                entityManager.flush();
-                entityManager.clear();
-                //TODO: phong event
-                cache.updateAllEmployees();
+        List<StatusLog> logs = employee.getStatusLogs();
 
-                publisher.publishEvent(new EmployeeEvent(EmployeeEvent.Action.UPDATED,
-                        employeeMapper.toDTO(cache.getEmployee(employee.getUsername()))));
-            }
+        StatusLog statusLog = logs.get(logs.size()-1);
+        if (statusLog.getStatus().getId() != 3) {
+            StatusLog newLog = new StatusLog();
+            Status status = cache.getStatus(3);
+            newLog.setStatus(status);
+            newLog.setEmployee(employee);
+            employee.getStatusLogs().add(newLog);
+            employeeRepository.save(employee);
+            log.info(String.format("%s log new status: %s", employeeDTO.getUsername(), status.getName()));
+
+            publisher.publishEvent(new EmployeeEvent(EmployeeEvent.Action.UPDATED,
+                    employeeMapper.toDTO(cache.getEmployee(employee.getUsername()))));
         }
+
         log.info(String.format("%s logout success ", employeeDTO.getUsername()));
 
-        return APIResultSet.ok(messageSource.getMessage("auth.logout.success", null, locale), null);
-    }
-
-    @Override
-    public ValidationResult validate(LoginRequestDTO request, Locale locale) {
-        return validationHelper.validateLoginInput(request.getUsername(), request.getPassword(), locale);
     }
 }

@@ -1,13 +1,10 @@
 package com.binhbkfx02295.cshelpdesk.employee_management.authentication.service;
-
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginResponseDTO;
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.util.ValidationResult;
+import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginResponse;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.EmployeeDTO;
-import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginRequestDTO;
+import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginRequest;
 
 
-import java.util.Locale;
+import javax.security.auth.login.AccountLockedException;
 
 public interface AuthenticationService {
 
@@ -18,18 +15,10 @@ public interface AuthenticationService {
      * Nếu sai thông tin đăng nhập -> OK với message lỗi và data null.
      * Nếu thành công -> OK với message thành công và LoginResponseDTO chứa thông tin user
      */
-    APIResultSet<LoginResponseDTO> login(LoginRequestDTO request);
+    LoginResponse login(LoginRequest request) throws AccountLockedException;
 
     /**
      * Đăng xuất và huỷ session hiện tại
-     * @return APIResultSet<Void>
      */
-    APIResultSet<Void> logout(EmployeeDTO employeeDTO);
-    /**
-     * Chỉ dùng để kiểm tra lỗi validate khi cần test
-     * @param request request login
-     * @param locale locale hiện tại
-     * @return ValidationResult
-     */
-    ValidationResult validate(LoginRequestDTO request, Locale locale);
+    void logout(EmployeeDTO employeeDTO);
 }
