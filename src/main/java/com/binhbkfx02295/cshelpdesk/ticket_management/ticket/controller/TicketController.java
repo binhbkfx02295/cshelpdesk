@@ -36,70 +36,70 @@ public class TicketController {
     private final TicketServiceImpl ticketService;
 
     @GetMapping()
-    public ResponseEntity<APIResultSet<TicketDetailDTO>> getById(@RequestParam(value = "id") int id) {
-        return APIResponseEntityHelper.from(ticketService.getTicketById(id));
+    public ResponseEntity<TicketDetailDTO> getById(@RequestParam(value = "id") int id) {
+        return ResponseEntity.ok(ticketService.getTicketById(id));
     }
 
     @PostMapping
-    public ResponseEntity<APIResultSet<TicketDetailDTO>> create(@RequestBody TicketDetailDTO dto) {
+    public ResponseEntity<TicketDetailDTO> create(@RequestBody TicketDetailDTO dto) {
         log.info(dto.toString());
-        return APIResponseEntityHelper.from(ticketService.createTicket(dto));
+        return ResponseEntity.ok(ticketService.createTicket(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<APIResultSet<TicketDetailDTO>> update(@PathVariable int id, @RequestBody TicketDetailDTO dto) {
-        return APIResponseEntityHelper.from(ticketService.updateTicket(id, dto));
+    public ResponseEntity<TicketDetailDTO> update(@PathVariable int id, @RequestBody TicketDetailDTO dto) {
+        return ResponseEntity.ok(ticketService.updateTicket(id, dto));
     }
 
     @GetMapping("/get-by-facebook-id")
-    public ResponseEntity<APIResultSet<List<TicketListDTO>>> getByFacebookId(@RequestParam(value = "id") String id) {
-        return APIResponseEntityHelper.from(ticketService.findAllByFacebookUserId(id));
+    public ResponseEntity<List<TicketListDTO>> getByFacebookId(@RequestParam(value = "id") String id) {
+        return ResponseEntity.ok(ticketService.findAllByFacebookUserId(id));
     }
 
     @PutMapping("/{ticketId}/note")
-    public ResponseEntity<APIResultSet<Void>> addNote(@PathVariable int ticketId, @RequestBody NoteDTO noteDto) {
-        System.out.println("Path varialbe " + ticketId);
-        return APIResponseEntityHelper.from(ticketService.addNoteToTicket(ticketId, noteDto));
+    public ResponseEntity<?> addNote(@PathVariable int ticketId, @RequestBody NoteDTO noteDto) {
+        ticketService.addNoteToTicket(ticketId, noteDto);
+        return ResponseEntity.ok(null);
     }
 
     @DeleteMapping("/{ticketId}/note/{noteId}")
-    public ResponseEntity<APIResultSet<Void>> removeNote(@PathVariable int ticketId, @PathVariable int noteId) {
-        return APIResponseEntityHelper.from(ticketService.deleteNoteFromTicket(ticketId, noteId));
+    public ResponseEntity<?> removeNote(@PathVariable int ticketId, @PathVariable int noteId) {
+        ticketService.deleteNoteFromTicket(ticketId, noteId);
+        return ResponseEntity.ok(null);
     }
 
     @GetMapping("/{ticketId}/note")
-    public ResponseEntity<APIResultSet<Set<NoteDTO>>> getAllNotes(@PathVariable int ticketId) {
-        return APIResponseEntityHelper.from(ticketService.getNotes(ticketId));
+    public ResponseEntity<Set<NoteDTO>> getAllNotes(@PathVariable int ticketId) {
+        return ResponseEntity.ok(ticketService.getNotes(ticketId));
     }
 
     @GetMapping(value = "/search")
-    public ResponseEntity<APIResultSet<PaginationResponse<TicketListDTO>>> search(
+    public ResponseEntity<PaginationResponse<TicketListDTO>> search(
             @ModelAttribute TicketSearchCriteria criteria,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        log.info(pageable.toString());
-        return APIResponseEntityHelper.from(ticketService.searchTickets(criteria, pageable));
+        return ResponseEntity.ok(ticketService.searchTickets(criteria, pageable));
     }
 
     @GetMapping(value = "/search-report")
-    public ResponseEntity<APIResultSet<PaginationResponse<TicketListDTO>>> search(
+    public ResponseEntity<PaginationResponse<TicketListDTO>> search(
             @ModelAttribute TicketSearchCriteria criteria) {
-        log.info(criteria.toString());
-        return APIResponseEntityHelper.from(ticketService.searchTickets(criteria, Pageable.unpaged()));
+        return ResponseEntity.ok(ticketService.searchTickets(criteria, Pageable.unpaged()));
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<APIResultSet<List<TicketDashboardDTO>>> dashboard(
+    public ResponseEntity<List<TicketDashboardDTO>> dashboard(
             @AuthenticationPrincipal UserPrincipal userPrincipal
             ) {
-        return APIResponseEntityHelper.from(ticketService.getForDashboard(userPrincipal.getUsername()));
+        //TODO: replace with jwt stateless
+        return ResponseEntity.ok(ticketService.getForDashboard(userPrincipal.getUsername()));
     }
 
     @PostMapping("/export-excel")
     public ResponseEntity<InputStreamResource> exportExcel(@RequestBody TicketSearchCriteria criteria) {
         try {
             // Lấy tất cả dữ liệu, không phân trang
-            APIResultSet<PaginationResponse<TicketListDTO>> result = ticketService.searchTickets(criteria, Pageable.unpaged());
-            List<TicketListDTO> tickets = result.getData().getContent();
+            PaginationResponse<TicketListDTO> result = ticketService.searchTickets(criteria, Pageable.unpaged());
+            List<TicketListDTO> tickets = result.getContent();
 
             ByteArrayInputStream in = TicketExcelExporter.exportToExcel(tickets);
 
@@ -111,6 +111,7 @@ public class TicketController {
                     .headers(headers)
                     .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                     .body(new InputStreamResource(in));
+
         } catch (IOException e) {
             log.error("Lỗi xuất Excel: ", e);
             return ResponseEntity.internalServerError().build();

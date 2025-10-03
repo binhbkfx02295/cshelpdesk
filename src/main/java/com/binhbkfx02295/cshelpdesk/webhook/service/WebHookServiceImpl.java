@@ -54,29 +54,22 @@ public class WebHookServiceImpl implements WebHookService {
 
                 //if sender is employee => get existing ticket, if any -> add message
                 if (isSenderEmployee) {
-                    APIResultSet<TicketDetailDTO> result = ticketService.findExistingTicket(recipient);
-
-                    if (result.isSuccess()) {
-                        TicketDetailDTO ticket = result.getData();
-                        if (ticket.getAssignee() == null) {
-                            if (autoAssign(ticket)) {
-                                ticketService.assignTicket(ticket.getId(), ticket);
-                            }
-
+                    TicketDetailDTO ticket = ticketService.findExistingTicket(recipient);
+                    if (ticket.getAssignee() == null) {
+                        if (autoAssign(ticket)) {
+                            ticketService.assignTicket(ticket.getId(), ticket);
                         }
-                        messageDTO = convertToMessageDTO(messaging);
-                        messageDTO.setSenderSystem(ticket.getAssignee() == null);
-                        log.info("test isSenderSystem? ticket.getAssignee() == null: {} ,isSenderSystem: {}", ticket.getAssignee() == null, messageDTO.isSenderSystem());
-                        messageDTO.setTicketId(ticket.getId());
-                        messageService.addMessage(messageDTO);
                     }
-                } else { // if sender is customer, get existing ticket, if any-> add message, else create.
-                    APIResultSet<TicketDetailDTO> result = ticketService.findExistingTicket(senderId);
-                    TicketDetailDTO ticket;
-                    if (result.isSuccess() && result.getData().getProgressStatus().getId() != 3) {
-                        ticket = result.getData();
-                    } else {
-                        //if no existign ticket, create, assign, add message -> save ticket to database;
+                    messageDTO = convertToMessageDTO(messaging);
+                    messageDTO.setSenderSystem(ticket.getAssignee() == null);
+                    log.info("test isSenderSystem? ticket.getAssignee() == null: {} ,isSenderSystem: {}", ticket.getAssignee() == null, messageDTO.isSenderSystem());
+                    messageDTO.setTicketId(ticket.getId());
+                    messageService.addMessage(messageDTO);
+                } else {
+                    TicketDetailDTO ticket = ticketService.findExistingTicket(senderId);
+
+                    if (ticket.getProgressStatus().getId() == 3) {
+
                         facebookUser = getOrCreateFacebookUser(senderId);
                         ticket = new TicketDetailDTO();
                         ticket.setProgressStatus(progressStatusMapper.toDTO(cache.getProgress(1)));
@@ -87,8 +80,9 @@ public class WebHookServiceImpl implements WebHookService {
                             facebookGraphAPIService.notifyNoAssignee(senderId);
                         }
 
-                        ticket = ticketService.createTicket(ticket).getData();
+                        ticket = ticketService.createTicket(ticket);
                     }
+
                     if (ticket.getAssignee() == null) {
                         if (autoAssign(ticket)) {
                             ticketService.assignTicket(ticket.getId(), ticket);
@@ -112,17 +106,17 @@ public class WebHookServiceImpl implements WebHookService {
     }
 
     private FacebookUserDetailDTO getOrCreateFacebookUser(String facebookId) {
-        //if sender is employee - skip
+
         if (facebookId.equalsIgnoreCase(properties.getPageId())) {
             return null;
         }
-        //check if exists
+
         APIResultSet<FacebookUserDetailDTO> existing = facebookUserService.get(facebookId);
         if (existing.getHttpCode() == 200) return existing.getData();
 
-        //fetch if not exists
+
         FacebookUserProfileDTO profile = facebookGraphAPIService.getUserProfile(facebookId);
-        //save after fetch
+
         APIResultSet<FacebookUserDetailDTO> result = facebookUserService.save(profile);
         return result.getData();
     }

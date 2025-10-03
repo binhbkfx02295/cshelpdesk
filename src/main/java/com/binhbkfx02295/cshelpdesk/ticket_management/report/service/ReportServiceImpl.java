@@ -25,62 +25,33 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public APIResultSet<Report> fetchHourlyReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
-        try {
+        List<TicketVolumeReportDTO> resultSet = ticketService.searchTicketsForVolumeReport(
+                new Timestamp(fromTime),
+                new Timestamp(toTime)
+        );
 
-            // 1. Lấy data từ service
-            APIResultSet<List<TicketVolumeReportDTO>> resultSet = ticketService.searchTicketsForVolumeReport(
-                    new Timestamp(fromTime),
-                    new Timestamp(toTime)
-            );
+        ZoneId zone = ZoneId.of(timezone);
+        LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
+        LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
 
-            if (!resultSet.isSuccess()) {
-                log.warn("Failed to fetch ticket data: {}", resultSet.getMessage());
-                return APIResultSet.internalError("Không thể tạo báo cáo: " + resultSet.getMessage());
-            }
-
-            // 2. Convert millis sang LocalDate (giữ đúng zone cho VN)
-            ZoneId zone = ZoneId.of(timezone);
-            LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
-            LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
-
-            // 3. Truyền fromDate, toDate vào hàm toHourlyReport đã chuẩn hóa
-            Report report = toHourlyReport(resultSet.getData(), fromDate, toDate, type, label, main, zone);
-            return APIResultSet.ok("Tạo báo cáo thành công", report);
-
-        } catch (Exception e) {
-            log.error("Lỗi khi tạo báo cáo hourly", e);
-            return APIResultSet.internalError("Lỗi hệ thống khi tạo báo cáo hourly");
-        }
+        Report report = toHourlyReport(resultSet, fromDate, toDate, type, label, main, zone);
+        return APIResultSet.ok("Tạo báo cáo thành công", report);
     }
 
     @Override
     public APIResultSet<Report> fetchWeekdayReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
         APIResultSet<Report> result;
-        try {
-            ZoneId zone = ZoneId.of(timezone);
-            LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
-            LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
+        ZoneId zone = ZoneId.of(timezone);
+        LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
+        LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
 
-            APIResultSet<List<TicketVolumeReportDTO>> resultSet = ticketService.searchTicketsForVolumeReport(
-                    new Timestamp(fromTime),
-                    new Timestamp(toTime)
-            );
+        List<TicketVolumeReportDTO> resultSet = ticketService.searchTicketsForVolumeReport(
+                new Timestamp(fromTime),
+                new Timestamp(toTime)
+        );
 
-            if (!resultSet.isSuccess()) {
-                log.warn("Failed to fetch ticket data: {}", resultSet.getMessage());
-                result = APIResultSet.internalError("Không thể tạo báo cáo: " + resultSet.getMessage());
-            } else {
-                Report report = toWeekdayReport(resultSet.getData(), fromDate, toDate, type, label, main, zone);
-                result = APIResultSet.ok("Tạo báo cáo thành công", report);
-            }
-
-
-        } catch (Exception e) {
-            log.error("Lỗi khi tạo báo cáo Week day", e);
-            result = APIResultSet.internalError("Lỗi hệ thống khi tạo báo cáo Week day");
-        }
-
-        log.info(result.getMessage());
+        Report report = toWeekdayReport(resultSet, fromDate, toDate, type, label, main, zone);
+        result = APIResultSet.ok("Tạo báo cáo thành công", report);
         return result;
     }
 
@@ -88,29 +59,17 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public APIResultSet<Report> fetchDayInMonthReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
         APIResultSet<Report> result;
-        try {
-            ZoneId zone = ZoneId.of(timezone);
-            LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
-            LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
+        ZoneId zone = ZoneId.of(timezone);
+        LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
+        LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
 
-            APIResultSet<List<TicketVolumeReportDTO>> resultSet = ticketService.searchTicketsForVolumeReport(
-                    new Timestamp(fromTime),
-                    new Timestamp(toTime)
-            );
+        List<TicketVolumeReportDTO> resultSet = ticketService.searchTicketsForVolumeReport(
+                new Timestamp(fromTime),
+                new Timestamp(toTime)
+        );
 
-            if (!resultSet.isSuccess()) {
-                log.warn("Failed to fetch ticket data: {}", resultSet.getMessage());
-                result = APIResultSet.internalError("Không thể tạo báo cáo: " + resultSet.getMessage());
-            } else {
-                Report report = toDailyReport(resultSet.getData(), fromDate, toDate, type, label, main, zone);
-                result= APIResultSet.ok("Tạo báo cáo thành công", report);
-            }
-
-        } catch (Exception e) {
-            log.error("Lỗi khi tạo báo cáo Day in Month", e);
-            result = APIResultSet.internalError("Lỗi hệ thống khi tạo báo cáo Day in Month");
-        }
-        log.info(result.getMessage());
+        Report report = toDailyReport(resultSet, fromDate, toDate, type, label, main, zone);
+        result= APIResultSet.ok("Tạo báo cáo thành công", report);
         return result;
     }
 

@@ -11,13 +11,17 @@ import com.binhbkfx02295.cshelpdesk.ticket_management.satisfaction.entity.Satisf
 import com.binhbkfx02295.cshelpdesk.ticket_management.tag.entity.Tag;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -29,17 +33,14 @@ public class Ticket {
 
     private String title;
 
-    private Timestamp createdAt;
-    private Timestamp lastUpdateAt;
-    private Timestamp closedAt;
 
     // Người xử lý (username hoặc tên người dùng)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
     private Employee assignee;
 
     // khách hàng
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "facebook_user_id", nullable = false)
     private FacebookUser facebookUser;
 
@@ -61,7 +62,7 @@ public class Ticket {
     private Satisfaction satisfaction;
 
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "ticket_tag",
             joinColumns = @JoinColumn(name = "ticket_id"),
@@ -75,6 +76,14 @@ public class Ticket {
 
     @OneToMany(mappedBy = "ticket", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
+
+    @CreationTimestamp
+    private Timestamp createdAt;
+
+    @UpdateTimestamp
+    private Timestamp lastUpdateAt;
+
+    private Timestamp closedAt;
 
     private Long firstResponseRate;
     private Long overallResponseRate;

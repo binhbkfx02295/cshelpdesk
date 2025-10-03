@@ -13,19 +13,19 @@ import java.util.Set;
 
 public interface TicketService {
 
-    APIResultSet<TicketDetailDTO> createTicket(TicketDetailDTO dto);
-    APIResultSet<TicketDetailDTO> updateTicket(int id, TicketDetailDTO dto);
-    APIResultSet<TicketDetailDTO> getTicketById(int id);
-    APIResultSet<Void> addTagToTicket(int ticketId, int hashtagId);
-    APIResultSet<Void> removeTagFromTicket(int ticketId, int hashtagId);
-    APIResultSet<PaginationResponse<TicketListDTO>> searchTickets(TicketSearchCriteria criteria, Pageable pageable);
-    APIResultSet<TicketDetailDTO> findExistingTicket(String facebookId);
-    APIResultSet<List<TicketListDTO>> findAllByFacebookUserId(String facebookId);
-    APIResultSet<Void> addNoteToTicket(int ticketId, NoteDTO note);
-    APIResultSet<Void> deleteNoteFromTicket(int ticketId, int noteId);
-    APIResultSet<Set<NoteDTO>> getNotes(int ticketId);
-    APIResultSet<Void> deleteById(int ticketId);
-    APIResultSet<List<TicketDashboardDTO>> getForDashboard(String username);
-    APIResultSet<List<TicketVolumeReportDTO>> searchTicketsForVolumeReport(Timestamp fromTime, Timestamp toTime);
-    APIResultSet<TicketDetailDTO> assignTicket(int id, TicketDetailDTO dto);
+    TicketDetailDTO createTicket(TicketDetailDTO dto);
+    TicketDetailDTO updateTicket(int id, TicketDetailDTO dto);
+    TicketDetailDTO getTicketById(int id);
+    void addTagToTicket(int ticketId, int hashtagId);
+    void removeTagFromTicket(int ticketId, int hashtagId);
+    PaginationResponse<TicketListDTO> searchTickets(TicketSearchCriteria criteria, Pageable pageable);
+    TicketDetailDTO findExistingTicket(String facebookId);
+    List<TicketListDTO> findAllByFacebookUserId(String facebookId);
+    void addNoteToTicket(int ticketId, NoteDTO note);
+    void deleteNoteFromTicket(int ticketId, int noteId);
+    Set<NoteDTO> getNotes(int ticketId);
+    void deleteById(int ticketId);
+    List<TicketDashboardDTO> getForDashboard(String username);
+    List<TicketVolumeReportDTO> searchTicketsForVolumeReport(Timestamp fromTime, Timestamp toTime);
+    TicketDetailDTO assignTicket(int id, TicketDetailDTO dto);
 }
