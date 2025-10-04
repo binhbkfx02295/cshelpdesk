@@ -4,6 +4,7 @@ import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.ticket_management.emotion.dto.EmotionDTO;
 import com.binhbkfx02295.cshelpdesk.ticket_management.emotion.mapper.EmotionMapper;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
+import com.binhbkfx02295.cshelpdesk.ticket_management.emotion.repository.EmotionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,17 +20,13 @@ public class EmotionServiceImpl implements EmotionService{
 
     private final MasterDataCache cache;
     private final EmotionMapper mapper;
+    private final EmotionRepository repository;
 
     @Override
-    public APIResultSet<List<EmotionDTO>> getAllEmotion() {
-        try {
-            APIResultSet<List<EmotionDTO>> result = APIResultSet.ok("Lay all emotions thanh cong", cache.getAllEmotions().values()
-                    .stream().map(mapper::toDTO).toList());
-            log.info(result.getMessage());
-            return result;
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return APIResultSet.internalError();
-        }
+    public List<EmotionDTO> getAllEmotion() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
     }
 }

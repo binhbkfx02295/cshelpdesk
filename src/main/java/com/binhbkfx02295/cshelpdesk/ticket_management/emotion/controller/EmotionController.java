@@ -21,7 +21,7 @@ public class EmotionController {
     private final EmotionServiceImpl emotionService;
 
     @GetMapping
-    public ResponseEntity<APIResultSet<List<EmotionDTO>>> getAllEmotion() {
-        return APIResponseEntityHelper.from(emotionService.getAllEmotion());
+    public ResponseEntity<List<EmotionDTO>> getAllEmotion() {
+        return ResponseEntity.ok(emotionService.getAllEmotion());
     }
 }

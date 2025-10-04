@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface EmotionService {
 
-    APIResultSet<List<EmotionDTO>> getAllEmotion();
+    List<EmotionDTO> getAllEmotion();
 }

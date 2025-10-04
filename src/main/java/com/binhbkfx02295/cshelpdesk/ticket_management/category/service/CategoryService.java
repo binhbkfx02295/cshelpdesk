@@ -6,8 +6,8 @@ import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import java.util.List;
 
 public interface CategoryService {
-    APIResultSet<CategoryDTO> create(CategoryDTO category);
-    APIResultSet<CategoryDTO> update(int id, CategoryDTO category);
-    APIResultSet<Void> delete(int id);
-    APIResultSet<List<CategoryDTO>> getAll();
+    CategoryDTO create(CategoryDTO category);
+    CategoryDTO update(int id, CategoryDTO category);
+    void delete(int id);
+    List<CategoryDTO> getAll();
 }
