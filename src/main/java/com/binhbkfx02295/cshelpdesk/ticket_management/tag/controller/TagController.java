@@ -18,30 +18,28 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping("/search")
-    public ResponseEntity<APIResultSet<List<TagDTO>>> search(@RequestParam String keyword) {
-        return APIResponseEntityHelper.from(tagService.search(keyword));
+    public ResponseEntity<List<TagDTO>> search(@RequestParam String keyword) {
+        return ResponseEntity.ok(tagService.search(keyword));
     }
 
     @GetMapping()
-    public ResponseEntity<APIResultSet<List<TagDTO>>> getAll() {
-        return APIResponseEntityHelper.from(tagService.getAll());
+    public ResponseEntity<List<TagDTO>> getAll() {
+        return ResponseEntity.ok(tagService.getAll());
     }
 
     @PostMapping
-    public ResponseEntity<APIResultSet<TagDTO>> create(@RequestBody TagDTO tagDTO) {
-        APIResultSet<TagDTO> result = tagService.create(tagDTO);
-        return APIResponseEntityHelper.from(result);
+    public ResponseEntity<TagDTO> create(@RequestBody TagDTO tagDTO) {
+        return ResponseEntity.ok(tagService.create(tagDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<APIResultSet<TagDTO>> update(@PathVariable int id, @RequestBody TagDTO tagDTO) {
-        APIResultSet<TagDTO> result = tagService.update(id, tagDTO);
-        return APIResponseEntityHelper.from(result);
+    public ResponseEntity<TagDTO> update(@PathVariable int id, @RequestBody TagDTO tagDTO) {
+        return ResponseEntity.ok(tagService.update(id, tagDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<APIResultSet<Void>> delete(@PathVariable int id) {
-        APIResultSet<Void> result = tagService.delete(id);
-        return APIResponseEntityHelper.from(result);
+    public ResponseEntity<?> delete(@PathVariable int id) {
+        tagService.delete(id);
+        return ResponseEntity.ok(null);
     }
 }
