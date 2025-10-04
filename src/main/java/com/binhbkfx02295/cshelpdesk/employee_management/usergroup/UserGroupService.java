@@ -5,9 +5,9 @@ import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import java.util.List;
 
 public interface UserGroupService {
-    APIResultSet<UserGroupDTO> createGroup(UserGroupDTO groupDTO);
-    APIResultSet<UserGroupDTO> updateGroup(String groupId, UserGroupDTO groupDTO);
-    APIResultSet<Void> deleteGroup(String groupId);
-    APIResultSet<UserGroupDTO> getGroupById(String groupId);
-    APIResultSet<List<UserGroupDTO>> getAllGroups();
+    UserGroupDTO createGroup(UserGroupDTO groupDTO);
+    UserGroupDTO updateGroup(int id, UserGroupDTO groupDTO);
+    void deleteGroup(int id);
+    UserGroupDTO getGroupById(int id);
+    List<UserGroupDTO> getAllGroups();
 }

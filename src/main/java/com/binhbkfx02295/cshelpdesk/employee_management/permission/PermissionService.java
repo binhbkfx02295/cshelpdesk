@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface PermissionService {
 
-    APIResultSet<PermissionDTO> createPermission(PermissionDTO permissionDTO);
-    APIResultSet<PermissionDTO> updatePermission(String permissionId, PermissionDTO permissionDTO);
-    APIResultSet<Boolean> deletePermission(String permissionId);
-    APIResultSet<PermissionDTO> getPermissionById(String permissionId);
-    APIResultSet<List<PermissionDTO>> getAllPermissions();
+    PermissionDTO createPermission(PermissionDTO permissionDTO);
+    PermissionDTO updatePermission(int id, PermissionDTO permissionDTO);
+    void deletePermission(int id);
+    PermissionDTO getPermissionById(int id);
+    List<PermissionDTO> getAllPermissions();
 }

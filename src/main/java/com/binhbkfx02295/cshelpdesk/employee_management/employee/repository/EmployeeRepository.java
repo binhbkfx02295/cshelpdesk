@@ -59,4 +59,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
             ) OR l IS NULL) AND e.username = :username
             """)
     Optional<Employee> findWithTop1StatusLog(@Param("username") String username);
+
+    boolean existsByUserGroup_GroupId(int id);
 }

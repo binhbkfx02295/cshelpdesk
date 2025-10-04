@@ -274,16 +274,7 @@ public class TicketServiceImpl implements TicketService {
         long overallResponseRate = 0;
         long resolutionRate = (existing.getClosedAt().getTime() - existing.getCreatedAt().getTime())/1000;
 
-        List<MessageDTO> messageList;
-        APIResultSet<List<MessageDTO>> result;
-        result = messageService.getMessagesByTicketId(existing.getId());
-        if (result.isSuccess()) {
-            messageList = new ArrayList<>(result.getData());
-        } else {
-            log.info("Loi tinh kpi ticket {}", result.getMessage());
-            return;
-        }
-
+        List<MessageDTO> messageList = messageService.getMessagesByTicketId(existing.getId());
         messageList.sort((o1, o2) -> o1.getId() - o2.getId());
 
         // Tính first response time

@@ -2,10 +2,7 @@ package com.binhbkfx02295.cshelpdesk.facebookuser.service;
 
 
 import com.binhbkfx02295.cshelpdesk.facebookgraphapi.dto.FacebookUserProfileDTO;
-import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserListDTO;
-import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserDetailDTO;
-import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserFetchDTO;
-import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserSearchCriteria;
+import com.binhbkfx02295.cshelpdesk.facebookuser.dto.*;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.PaginationResponse;
 import org.springframework.data.domain.Pageable;
@@ -27,23 +24,23 @@ public interface FacebookUserService {
 
     static final String MSG_ERROR_NOT_ALLOWED = "MSG_ERROR_NOT_ALLOWED";
 
-    APIResultSet<FacebookUserDetailDTO> save(FacebookUserDetailDTO save);
+    FacebookUserDetailDTO save(FacebookUserDetailDTO save);
 
-    APIResultSet<FacebookUserDetailDTO> save(FacebookUserFetchDTO save);
+    FacebookUserDetailDTO save(FacebookUserFetchDTO save);
 
-    APIResultSet<FacebookUserDetailDTO> update(FacebookUserDetailDTO updatedUser);
+    FacebookUserDetailDTO update(FacebookUserDetailDTO updatedUser);
 
-    APIResultSet<FacebookUserDetailDTO> get(String id);
+    FacebookUserDetailDTO get(String id);
 
-    APIResultSet<List<FacebookUserListDTO>> getAll();
+    List<FacebookUserListDTO> getAll();
 
-    APIResultSet<Void> existsById(String facebookId);
+    void deleteById(String s);
 
-    APIResultSet<Void> deleteById(String s);
+    PaginationResponse<FacebookUserDetailDTO> searchUsers(FacebookUserSearchCriteria criteria, Pageable pageable);
 
-    APIResultSet<PaginationResponse<FacebookUserDetailDTO>> searchUsers(FacebookUserSearchCriteria criteria, Pageable pageable);
+    void deleteAll(List<String> ids);
 
-    APIResultSet<Void> deleteAll(ArrayList<String> ids);
+    FacebookUserDetailDTO save(FacebookUserProfileDTO profile);
 
-    APIResultSet<FacebookUserDetailDTO> save(FacebookUserProfileDTO profile);
+    List<FacebookUserExportDTO> exportSearchUsers(FacebookUserSearchCriteria criteria, Pageable unpaged);
 }

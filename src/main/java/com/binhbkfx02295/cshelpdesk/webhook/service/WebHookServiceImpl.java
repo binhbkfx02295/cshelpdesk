@@ -14,9 +14,9 @@ import com.binhbkfx02295.cshelpdesk.message.service.MessageServiceImpl;
 import com.binhbkfx02295.cshelpdesk.ticket_management.progress_status.mapper.ProgressStatusMapper;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.TicketDetailDTO;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.service.TicketServiceImpl;
-import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.message.dto.MessageDTO;
 import com.binhbkfx02295.cshelpdesk.webhook.dto.WebHookEventDTO;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -62,12 +62,10 @@ public class WebHookServiceImpl implements WebHookService {
                     }
                     messageDTO = convertToMessageDTO(messaging);
                     messageDTO.setSenderSystem(ticket.getAssignee() == null);
-                    log.info("test isSenderSystem? ticket.getAssignee() == null: {} ,isSenderSystem: {}", ticket.getAssignee() == null, messageDTO.isSenderSystem());
                     messageDTO.setTicketId(ticket.getId());
                     messageService.addMessage(messageDTO);
                 } else {
                     TicketDetailDTO ticket = ticketService.findExistingTicket(senderId);
-
                     if (ticket.getProgressStatus().getId() == 3) {
 
                         facebookUser = getOrCreateFacebookUser(senderId);
@@ -106,19 +104,12 @@ public class WebHookServiceImpl implements WebHookService {
     }
 
     private FacebookUserDetailDTO getOrCreateFacebookUser(String facebookId) {
-
-        if (facebookId.equalsIgnoreCase(properties.getPageId())) {
-            return null;
+        try {
+            return facebookUserService.get(facebookId);
+        } catch (EntityNotFoundException e) {
+            FacebookUserProfileDTO profile = facebookGraphAPIService.getUserProfile(facebookId);
+           return facebookUserService.save(profile);
         }
-
-        APIResultSet<FacebookUserDetailDTO> existing = facebookUserService.get(facebookId);
-        if (existing.getHttpCode() == 200) return existing.getData();
-
-
-        FacebookUserProfileDTO profile = facebookGraphAPIService.getUserProfile(facebookId);
-
-        APIResultSet<FacebookUserDetailDTO> result = facebookUserService.save(profile);
-        return result.getData();
     }
 
 

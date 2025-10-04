@@ -18,18 +18,16 @@ public class MessageController {
     private final MessageService messageService;
 
     @GetMapping
-    public ResponseEntity<APIResultSet<List<MessageDTO>>> getMessagesByTicket(
+    public ResponseEntity<List<MessageDTO>> getMessagesByTicket(
             @RequestParam("ticketId") int ticketId
     ) {
-        APIResultSet<List<MessageDTO>> result = messageService.getMessagesByTicketId(ticketId);
-        return APIResponseEntityHelper.from(result);
+        return ResponseEntity.ok(messageService.getMessagesByTicketId(ticketId));
     }
 
     @PostMapping
-    public ResponseEntity<APIResultSet<MessageDTO>> addMessage(
+    public ResponseEntity<MessageDTO> addMessage(
             @RequestBody MessageDTO messageDTO
     ) {
-        APIResultSet<MessageDTO> result = messageService.addMessage(messageDTO);
-        return APIResponseEntityHelper.from(result);
+        return ResponseEntity.ok(messageService.addMessage(messageDTO));
     }
 }

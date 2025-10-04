@@ -5,6 +5,7 @@ import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserExportDTO;
 import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserListDTO;
 import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserDetailDTO;
 import com.binhbkfx02295.cshelpdesk.facebookuser.dto.FacebookUserSearchCriteria;
+import com.binhbkfx02295.cshelpdesk.facebookuser.service.FacebookUserService;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResponseEntityHelper;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.facebookuser.service.FacebookUserServiceImpl;
@@ -29,7 +30,7 @@ import java.util.List;
 @Slf4j
 public class FacebookUserController {
 
-    FacebookUserServiceImpl facebookUserService;
+    FacebookUserService facebookUserService;
 
     @Autowired
     public FacebookUserController(FacebookUserServiceImpl service) {
@@ -43,50 +44,42 @@ public class FacebookUserController {
 
     //get all
     @GetMapping(params = "!id")
-    public ResponseEntity<APIResultSet<List<FacebookUserListDTO>>> getAll() {
-        APIResultSet<List<FacebookUserListDTO>> resultSet = facebookUserService.getAll();
-        return ResponseEntity.status(resultSet.getHttpCode()).body(resultSet);
+    public ResponseEntity<List<FacebookUserListDTO>> getAll() {
+        return ResponseEntity.ok(facebookUserService.getAll());
     }
 
     @GetMapping(params = "id")
-    public ResponseEntity<APIResultSet<FacebookUserDetailDTO>> get(@RequestParam String id) {
-        APIResultSet<FacebookUserDetailDTO> resultSet = facebookUserService.get(id);
-        return ResponseEntity.status(resultSet.getHttpCode()).body(resultSet);
+    public ResponseEntity<FacebookUserDetailDTO> get(@RequestParam String id) {
+        return ResponseEntity.ok(facebookUserService.get(id));
     }
 
     @PostMapping
-    public ResponseEntity<APIResultSet<FacebookUserDetailDTO>> createFacebookUser(@RequestBody FacebookUserDetailDTO user) {
-        log.info(user.toString());
-        APIResultSet<FacebookUserDetailDTO> resultSet = facebookUserService.save(user);
-        return ResponseEntity.status(resultSet.getHttpCode()).body(resultSet);
+    public ResponseEntity<FacebookUserDetailDTO> createFacebookUser(@RequestBody FacebookUserDetailDTO user) {
+        return ResponseEntity.ok(facebookUserService.save(user));
     }
 
 
     @PutMapping()
-    public ResponseEntity<APIResultSet<FacebookUserDetailDTO>> updateFacebookUser(@RequestBody FacebookUserDetailDTO user) {
-        log.info(user.toString());
-        return APIResponseEntityHelper.from(facebookUserService.update(user));
+    public ResponseEntity<FacebookUserDetailDTO> updateFacebookUser(@RequestBody FacebookUserDetailDTO user) {
+        return ResponseEntity.ok(facebookUserService.update(user));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<APIResultSet<PaginationResponse<FacebookUserDetailDTO>>> searchFacebookUser(
+    public ResponseEntity<PaginationResponse<FacebookUserDetailDTO>> searchFacebookUser(
             @ModelAttribute FacebookUserSearchCriteria criteria,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        log.info(criteria.toString());
-        APIResultSet<PaginationResponse<FacebookUserDetailDTO>> resultSet = facebookUserService.searchUsers(criteria, pageable);
-        return APIResponseEntityHelper.from(resultSet);
+        return ResponseEntity.ok(facebookUserService.searchUsers(criteria, pageable));
     }
 
     @DeleteMapping
-    public ResponseEntity<APIResultSet<Void>> deleteFacebookUser(@RequestParam String id) {
-        return APIResponseEntityHelper.from(facebookUserService.deleteById(id));
+    public ResponseEntity<?> deleteFacebookUser(@RequestParam String id) {
+        facebookUserService.deleteById(id);
+        return ResponseEntity.ok(null);
     }
 
     @GetMapping("/export-excel")
     public ResponseEntity<InputStreamResource> exportExcel(
             @ModelAttribute FacebookUserSearchCriteria criteria) {
-        // Lấy tất cả dữ liệu, không phân trang
-        log.info(criteria.toString());
         List<FacebookUserExportDTO> result = facebookUserService.exportSearchUsers(criteria, Pageable.unpaged());
         if (result == null) {
             return ResponseEntity.internalServerError().build();
@@ -102,10 +95,11 @@ public class FacebookUserController {
     }
 
     @DeleteMapping("/delete-all")
-    public ResponseEntity<APIResultSet<Void>> deleteAll(
-            @RequestBody ArrayList<String> ids
+    public ResponseEntity<?> deleteAll(
+            @RequestBody List<String> ids
             ) {
-        return APIResponseEntityHelper.from(facebookUserService.deleteAll(ids));
+        facebookUserService.deleteAll(ids);
+        return ResponseEntity.ok(null);
     }
 
 

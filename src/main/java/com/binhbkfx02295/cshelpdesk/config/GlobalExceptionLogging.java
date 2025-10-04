@@ -19,14 +19,14 @@ public class GlobalExceptionLogging {
 
     @Around("atServices()")
     public Object doLogging(ProceedingJoinPoint jp) throws Throwable {
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
         long end;
         try {
             Object result = jp.proceed();
-            end = System.currentTimeMillis();
+            end = System.nanoTime();
 
             log.info("[OK] execution done: {}ms at {}.{}()",
-                    end - start,
+                    (end - start) / 1_000_000,
                     jp.getSignature().getClass().getSimpleName(),
                     jp.getSignature().getName()
             );
@@ -34,16 +34,12 @@ public class GlobalExceptionLogging {
             return result;
         } catch (Throwable ex) {
             end = System.currentTimeMillis();
-            Throwable root = ExceptionUtils.getRootCause(ex);
 
-            if (root == null) root = ex;
-
-            log.info("[EXCEPTION] {}ms at {}.{}()",
-                    end - start,
+            log.info("[EXCEPTION] {}ms after {}.{}()",
+                    (end - start) / 1_000_000,
                     jp.getSignature().getClass().getSimpleName(),
-                    jp.getSignature().getName(),
-                    root);
-
+                    jp.getSignature().getName()
+            );
             throw ex;
         }
     }

@@ -38,14 +38,13 @@ public class WebHookController {
 
     @PostMapping
     public ResponseEntity<String> receive(
+            @RequestBody WebHookEventDTO dto,
             HttpServletRequest request) throws IOException {
         String rawBody = new BufferedReader(new InputStreamReader(request.getInputStream()))
                 .lines().collect(Collectors.joining("\n"));
         log.info("[Webhook] Raw body:\n{}", rawBody);
-
-        WebHookEventDTO event = new ObjectMapper().readValue(rawBody, WebHookEventDTO.class);
-        log.info("[Webhook] Raw payload received: {}", event);
-        webhookService.handleWebhook(event);
+        log.info("[Webhook] Raw payload received: {}", dto);
+        webhookService.handleWebhook(dto);
 
         return ResponseEntity.ok("EVENT_RECEIVED");
     }

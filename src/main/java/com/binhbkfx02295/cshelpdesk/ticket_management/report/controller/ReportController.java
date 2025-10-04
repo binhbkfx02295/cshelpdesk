@@ -21,35 +21,36 @@ public class ReportController {
     private final ReportServiceImpl reportService;
 
     @GetMapping(value = "/ticket-by-hour", params = {"fromTime", "toTime", "type", "label", "timezone"})
-    public ResponseEntity<APIResultSet<Report>> getHourlyReport(
+    public ResponseEntity<Report> getHourlyReport(
             long fromTime,
             long toTime,
             String type,
             String label,
             String timezone,
             @RequestParam(value = "main", defaultValue = "false") boolean main) {
-        return APIResponseEntityHelper.from(reportService.fetchHourlyReport(fromTime, toTime, type, label, main, timezone));
+        return ResponseEntity.ok(reportService.fetchHourlyReport(fromTime, toTime, type, label, main, timezone));
     }
 
     @GetMapping(value = "/ticket-by-weekday", params = {"fromTime", "toTime", "type", "label", "timezone"})
-    public ResponseEntity<APIResultSet<Report>> getWeekdayReport(
+    public ResponseEntity<Report> getWeekdayReport(
             long fromTime,
             long toTime,
             String type,
             String label,
             String timezone,
             @RequestParam(value = "main", defaultValue = "false") boolean main) {
-        return APIResponseEntityHelper.from(reportService.fetchWeekdayReport(fromTime, toTime, type, label, main, timezone));
+        return ResponseEntity.ok(reportService.fetchWeekdayReport(fromTime, toTime, type, label, main, timezone));
     }
 
     @GetMapping(value = "/ticket-by-day", params = {"fromTime", "toTime", "type", "label", "timezone"})
-    public ResponseEntity<APIResultSet<Report>> getDayInMonthReport(
+    public ResponseEntity<Report> getDayInMonthReport(
             long fromTime,
             long toTime,
             String type,
             String label,
             String timezone,
             @RequestParam(value = "main", defaultValue = "false") boolean main) {
-        return APIResponseEntityHelper.from(reportService.fetchDayInMonthReport(fromTime, toTime, type, label, main, timezone));
+        return ResponseEntity.ok(reportService.fetchDayInMonthReport(fromTime, toTime, type, label, main, timezone));
     }
+
 }

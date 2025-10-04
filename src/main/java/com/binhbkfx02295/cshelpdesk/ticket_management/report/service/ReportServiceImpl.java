@@ -24,7 +24,7 @@ public class ReportServiceImpl implements ReportService {
     private final TicketService ticketService;
 
     @Override
-    public APIResultSet<Report> fetchHourlyReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
+    public Report fetchHourlyReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
         List<TicketVolumeReportDTO> resultSet = ticketService.searchTicketsForVolumeReport(
                 new Timestamp(fromTime),
                 new Timestamp(toTime)
@@ -33,14 +33,11 @@ public class ReportServiceImpl implements ReportService {
         ZoneId zone = ZoneId.of(timezone);
         LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
         LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
-
-        Report report = toHourlyReport(resultSet, fromDate, toDate, type, label, main, zone);
-        return APIResultSet.ok("Tạo báo cáo thành công", report);
+        return toHourlyReport(resultSet, fromDate, toDate, type, label, main, zone);
     }
 
     @Override
-    public APIResultSet<Report> fetchWeekdayReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
-        APIResultSet<Report> result;
+    public Report fetchWeekdayReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
         ZoneId zone = ZoneId.of(timezone);
         LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
         LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
@@ -50,15 +47,13 @@ public class ReportServiceImpl implements ReportService {
                 new Timestamp(toTime)
         );
 
-        Report report = toWeekdayReport(resultSet, fromDate, toDate, type, label, main, zone);
-        result = APIResultSet.ok("Tạo báo cáo thành công", report);
-        return result;
+        return toWeekdayReport(resultSet, fromDate, toDate, type, label, main, zone);
     }
 
 
     @Override
-    public APIResultSet<Report> fetchDayInMonthReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
-        APIResultSet<Report> result;
+    public Report fetchDayInMonthReport(long fromTime, long toTime, String type, String label, boolean main, String timezone) {
+
         ZoneId zone = ZoneId.of(timezone);
         LocalDate fromDate = Instant.ofEpochMilli(fromTime).atZone(zone).toLocalDate();
         LocalDate toDate = Instant.ofEpochMilli(toTime).atZone(zone).toLocalDate();
@@ -68,9 +63,7 @@ public class ReportServiceImpl implements ReportService {
                 new Timestamp(toTime)
         );
 
-        Report report = toDailyReport(resultSet, fromDate, toDate, type, label, main, zone);
-        result= APIResultSet.ok("Tạo báo cáo thành công", report);
-        return result;
+        return toDailyReport(resultSet, fromDate, toDate, type, label, main, zone);
     }
 
     private Report toHourlyReport(List<TicketVolumeReportDTO> data, LocalDate fromDate, LocalDate toDate, String type, String label, boolean main, ZoneId zone) {

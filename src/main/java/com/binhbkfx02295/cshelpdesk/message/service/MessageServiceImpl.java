@@ -10,6 +10,7 @@ import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.repository.TicketRe
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.websocket.event.MessageEvent;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,44 +35,20 @@ public class MessageServiceImpl implements MessageService {
     private final EntityManager entityManager;
 
     @Override
-    public APIResultSet<MessageDTO> addMessage(MessageDTO messageDTO) {
-        try {
-            Message saved = messageRepository.save(mapper.toEntity(messageDTO));
-            entityManager.flush();
-            entityManager.clear();
-            cache.putMessage(messageRepository.findById(saved.getId()).get());
-            cache.getTicket(messageDTO.getTicketId()).getMessages().add(saved);
-            //TODO: publish event
-            publisher.publishEvent(new MessageEvent(mapper.toEventDTO(cache.getMessage(saved.getId()))));
-            return APIResultSet.ok("Message added successfully", mapper.toDTO(cache.getMessage(saved.getId())));
-        } catch (Exception e) {
-            return APIResultSet.internalError("Failed to save message: " + e.getMessage());
-        }
+    public MessageDTO addMessage(MessageDTO messageDTO) {
+        Message saved = messageRepository.save(mapper.toEntity(messageDTO));
+        publisher.publishEvent(new MessageEvent(mapper.toEventDTO(cache.getMessage(saved.getId()))));
+        return mapper.toDTO(saved);
     }
 
     @Override
-    public APIResultSet<List<MessageDTO>> getMessagesByTicketId(int ticketId) {
-        try {
-            Ticket openingTicket = cache.getTicket(ticketId);
-            List<Message> messages;
+    public List<MessageDTO> getMessagesByTicketId(int ticketId) {
+        if (!ticketRepository.existsById(ticketId))
+            throw new EntityNotFoundException("Loi ticket khong ton tai");
 
-            if (openingTicket != null && cache.getAllMessages() != null) {
-                messages = cache.getAllMessages().values().stream().filter(message -> {
-                    return message.getTicket().getId()==ticketId;
-                }).toList();
-            } else {
-                messages = messageRepository.findByTicket_Id(ticketId);
-            }
-            List<MessageDTO> dtos = messages.stream()
-                    .map(mapper::toDTO)
-                    .collect(Collectors.toList());
-            return APIResultSet.ok("Messages retrieved successfully", dtos);
-        } catch (Exception e) {
-            return APIResultSet.internalError("Failed to retrieve messages: " + e.getMessage());
-        }
-    }
-
-    public List<Message> toEntity(List<MessageDTO> dtos) {
-        return dtos.stream().map(mapper::toEntity).toList();
+        return messageRepository.findByTicket_Id(ticketId)
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
     }
 }

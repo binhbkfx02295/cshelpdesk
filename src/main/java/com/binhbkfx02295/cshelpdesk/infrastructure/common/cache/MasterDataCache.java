@@ -79,7 +79,7 @@ public class MasterDataCache {
         log.info("caching successfully");
     }
 
-    @Scheduled(cron = "0 0 7 * * *", zone = "Asia/Ho_Chi_Minh")
+//    @Scheduled(cron = "0 0 7 * * *", zone = "Asia/Ho_Chi_Minh")
     public void refreshDaily() {
         refresh();
     }

@@ -16,28 +16,29 @@ public class UserGroupController {
     private final UserGroupService userGroupService;
 
     @PostMapping
-    public ResponseEntity<APIResultSet<UserGroupDTO>> createGroup(@RequestBody UserGroupDTO dto) {
-        return APIResponseEntityHelper.from(userGroupService.createGroup(dto));
+    public ResponseEntity<UserGroupDTO> createGroup(@RequestBody UserGroupDTO dto) {
+        return ResponseEntity.ok(userGroupService.createGroup(dto));
     }
 
-    @PutMapping("/{groupId}")
-    public ResponseEntity<APIResultSet<UserGroupDTO>> updateGroup(@PathVariable String groupId,
+    @PutMapping("/{id}")
+    public ResponseEntity<UserGroupDTO> updateGroup(@PathVariable int id,
                                                                   @RequestBody UserGroupDTO dto) {
-        return APIResponseEntityHelper.from(userGroupService.updateGroup(groupId, dto));
+        return ResponseEntity.ok(userGroupService.updateGroup(id, dto));
     }
 
-    @DeleteMapping("/{groupId}")
-    public ResponseEntity<APIResultSet<Void>> deleteGroup(@PathVariable String groupId) {
-        return APIResponseEntityHelper.from(userGroupService.deleteGroup(groupId));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteGroup(@PathVariable int id) {
+        userGroupService.deleteGroup(id);
+        return ResponseEntity.ok(null);
     }
 
-    @GetMapping("/{groupId}")
-    public ResponseEntity<APIResultSet<UserGroupDTO>> getGroupById(@PathVariable String groupId) {
-        return APIResponseEntityHelper.from(userGroupService.getGroupById(groupId));
+    @GetMapping("/{id}")
+    public ResponseEntity<UserGroupDTO> getGroupById(@PathVariable int id) {
+        return ResponseEntity.ok(userGroupService.getGroupById(id));
     }
 
     @GetMapping
-    public ResponseEntity<APIResultSet<List<UserGroupDTO>>> getAllGroups() {
-        return APIResponseEntityHelper.from(userGroupService.getAllGroups());
+    public ResponseEntity<List<UserGroupDTO>> getAllGroups() {
+        return ResponseEntity.ok(userGroupService.getAllGroups());
     }
 }

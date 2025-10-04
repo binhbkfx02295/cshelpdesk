@@ -59,19 +59,19 @@ public class MasterDataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        seedPermission();
-        seedUserGroup();
-        seedStatus();
-        seedEmployee();
-        seedProgressStatuses();
-        seedCustomerEmotions();
-        seedCustomerSatisfactions();
-        seedCategory();
+//        seedPermission();
+//        seedUserGroup();
+//        seedStatus();
+//        seedEmployee();
+//        seedProgressStatuses();
+//        seedCustomerEmotions();
+//        seedCustomerSatisfactions();
+//        seedCategory();
 //        seedFacebookUsers(50);
 //        seedTickets(6720);
 //        seedConversations(20);
-        log.info("seeding done");
-        cache.refresh();
+//        log.info("seeding done");
+//        cache.refresh();
     }
 
     private void seedConversations(int num) {
