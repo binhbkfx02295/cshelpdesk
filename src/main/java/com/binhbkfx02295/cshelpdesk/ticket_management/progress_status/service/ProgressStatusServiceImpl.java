@@ -23,16 +23,11 @@ public class ProgressStatusServiceImpl implements ProgressStatusService {
     private final MasterDataCache cache;
 
     @Override
-    public APIResultSet<List<ProgressStatusDTO>> getAllProgressStatus() {
-        try {
-            APIResultSet<List<ProgressStatusDTO>> result = APIResultSet.ok("Lay all progress status thanh cong",
-                    cache.getAllProgress().values().stream().map(mapper::toDTO).toList());
-            log.info(result.getMessage());
-            return result;
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return APIResultSet.internalError();
-        }
+    public List<ProgressStatusDTO> getAllProgressStatus() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
     }
 
 

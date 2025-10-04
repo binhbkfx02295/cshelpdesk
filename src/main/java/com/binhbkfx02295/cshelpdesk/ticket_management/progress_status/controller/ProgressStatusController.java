@@ -21,7 +21,7 @@ public class ProgressStatusController {
     private final ProgressStatusServiceImpl progressStatusService;
 
     @GetMapping
-    public ResponseEntity<APIResultSet<List<ProgressStatusDTO>>> getAllProgressStatus() {
-        return APIResponseEntityHelper.from(progressStatusService.getAllProgressStatus());
+    public ResponseEntity<List<ProgressStatusDTO>> getAllProgressStatus() {
+        return ResponseEntity.ok(progressStatusService.getAllProgressStatus());
     }
 }

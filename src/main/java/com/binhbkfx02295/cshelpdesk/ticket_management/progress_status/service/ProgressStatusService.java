@@ -4,5 +4,5 @@ import com.binhbkfx02295.cshelpdesk.ticket_management.progress_status.dto.Progre
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import java.util.List;
 public interface ProgressStatusService {
-    APIResultSet<List<ProgressStatusDTO>> getAllProgressStatus();
+    List<ProgressStatusDTO> getAllProgressStatus();
 }
