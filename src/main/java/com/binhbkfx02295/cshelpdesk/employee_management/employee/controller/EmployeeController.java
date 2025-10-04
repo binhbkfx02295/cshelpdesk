@@ -7,6 +7,7 @@ import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.infrastructure.security.auth.UserPrincipal;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResponseEntityHelper;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,98 +27,96 @@ public class EmployeeController {
 
 
     @PostMapping
-    public ResponseEntity<APIResultSet<EmployeeDTO>> createUser(@RequestBody EmployeeDTO employeeDTO) {
-
-        return APIResponseEntityHelper.from(employeeService.createUser(employeeDTO));
+    public ResponseEntity<EmployeeDTO> createUser(@RequestBody @Valid EmployeeDTO employeeDTO) {
+        return ResponseEntity.ok(employeeService.createUser(employeeDTO));
     }
 
-    @GetMapping("")
-    public ResponseEntity<APIResultSet<EmployeeDTO>> getUserByUsername(@RequestParam(value = "username", required = false) String username) {
-        return APIResponseEntityHelper.from(employeeService.getUserByUsername(username));
+    @GetMapping
+    public ResponseEntity<EmployeeDTO> getUserByUsername(@RequestParam(value = "username", required = false) String username) {
+        return ResponseEntity.ok(employeeService.getUserByUsername(username));
     }
 
     @GetMapping("/get-all-user")
-    public ResponseEntity<APIResultSet<List<EmployeeDTO>>> getAllUsers() {
-        return APIResponseEntityHelper.from(employeeService.getAllUsers());
+    public ResponseEntity<List<EmployeeDTO>> getAllUsers() {
+        return ResponseEntity.ok(employeeService.getAllUsers());
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<APIResultSet<List<EmployeeDashboardDTO>>> dashboard() {
-        return APIResponseEntityHelper.from(employeeService.getForDashboard());
+    public ResponseEntity<List<EmployeeDashboardDTO>> dashboard() {
+        return ResponseEntity.ok(employeeService.getForDashboard());
     }
 
     //Employee profile
     @GetMapping("/me")
-    public ResponseEntity<APIResultSet<UserPrincipal>> getUserProfile(
+    public ResponseEntity<UserPrincipal> getUserProfile(
             @AuthenticationPrincipal UserPrincipal user) {
-        return APIResponseEntityHelper.from(APIResultSet.ok("OK", user));
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping("/me")
-    public ResponseEntity<APIResultSet<EmployeeDetailDTO>> updateProfile(
+    public ResponseEntity<EmployeeDetailDTO> updateProfile(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestBody EmployeeDTO employeeDTO) {
-        return APIResponseEntityHelper.from(employeeService.updateUser(user.getUsername(), employeeDTO));
+        return ResponseEntity.ok(employeeService.updateUser(user.getUsername(), employeeDTO));
     }
 
     @PutMapping
-    public ResponseEntity<APIResultSet<EmployeeDetailDTO>> updateUser(
-            @RequestBody EmployeeDTO dto
+    public ResponseEntity<EmployeeDetailDTO> updateUser(
+            @RequestBody @Valid EmployeeDTO dto
     ) {
         log.info("update user: {}", dto);
-        return APIResponseEntityHelper.from(employeeService.updateUser(dto.getUsername(), dto));
+        return ResponseEntity.ok(employeeService.updateUser(dto.getUsername(), dto));
     }
 
     @PutMapping("/me/password")
-    public ResponseEntity<APIResultSet<Void>> changePassword(
+    public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestBody ChangePasswordDTO changePasswordDTO) {
-        try {
-            return APIResponseEntityHelper.from(employeeService.changePassword(
-                    user.getUsername(),
-                    changePasswordDTO.getPassword(),
-                    changePasswordDTO.getNewPassword()));
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            return APIResponseEntityHelper.from(APIResultSet.internalError());
-        }
+
+        employeeService.changePassword(
+                user.getUsername(),
+                changePasswordDTO.getPassword(),
+                changePasswordDTO.getNewPassword());
+
+        return ResponseEntity.ok(null);
 
     }
 
     @GetMapping("/me/online-status")
-    public ResponseEntity<APIResultSet<StatusLogDTO>> getOnlineStatus(
+    public ResponseEntity<StatusLogDTO> getOnlineStatus(
             @AuthenticationPrincipal UserPrincipal user) {
-        return APIResponseEntityHelper.from(employeeService.getLatestOnlineStatus(user.getUsername()));
+        return ResponseEntity.ok(employeeService.getLatestOnlineStatus(user.getUsername()));
     }
 
     @GetMapping("/me/update-cache")
-    public ResponseEntity<APIResultSet<StatusLogDTO>> updatecache(
+    public ResponseEntity<StatusLogDTO> updatecache(
             @AuthenticationPrincipal UserPrincipal user) {
         cache.updateAllEmployees();
-        return APIResponseEntityHelper.from(employeeService.getLatestOnlineStatus(user.getUsername()));
+        return ResponseEntity.ok(employeeService.getLatestOnlineStatus(user.getUsername()));
     }
 
     @PutMapping("/me/online-status")
-    public ResponseEntity<APIResultSet<Void>> updateOnlineStatus(
+    public ResponseEntity<Void> updateOnlineStatus(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestBody StatusLogDTO logDTO ) {
-        logDTO.setUsername(user.getUsername());
-        return APIResponseEntityHelper.from(employeeService.updateOnlineStatus(logDTO));
+        employeeService.updateOnlineStatus(logDTO);
+        return ResponseEntity.ok(null);
     }
 
     @PutMapping("/reset-password")
-    public ResponseEntity<APIResultSet<Void>> resetPassword(
-            @RequestBody ResetPasswordDTO resetPasswordDTO
+    public ResponseEntity<Void> resetPassword(
+            @RequestBody @Valid ResetPasswordDTO resetPasswordDTO
     ) {
-        return APIResponseEntityHelper.from(employeeService.resetPassword(resetPasswordDTO));
+        employeeService.resetPassword(resetPasswordDTO);
+        return ResponseEntity.ok(null);
     }
 
     @DeleteMapping()
-    public ResponseEntity<APIResultSet<Void>> deleteUser(
+    public ResponseEntity<Void> deleteUser(
             @RequestBody EmployeeDTO employeeDTO
     ) {
-        log.info("delete user {}", employeeDTO);
-        return APIResponseEntityHelper.from(employeeService.deleteByUsername(employeeDTO.getUsername()));
+        employeeService.deleteByUsername(employeeDTO.getUsername());
+        return ResponseEntity.ok(null);
     }
 
 }
