@@ -5,5 +5,5 @@ import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import java.util.List;
 
 public interface SatisfactionService {
-    APIResultSet<List<SatisfactionDTO>> getAllSatisfaction();
+    List<SatisfactionDTO> getAllSatisfaction();
 }

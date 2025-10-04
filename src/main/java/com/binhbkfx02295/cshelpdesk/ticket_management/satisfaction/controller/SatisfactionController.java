@@ -20,7 +20,7 @@ public class SatisfactionController {
     private final SatisfactionServiceImpl satisfactionService;
 
     @GetMapping
-    public ResponseEntity<APIResultSet<List<SatisfactionDTO>>> getAllSatisfaction() {
-        return APIResponseEntityHelper.from(satisfactionService.getAllSatisfaction());
+    public ResponseEntity<List<SatisfactionDTO>> getAllSatisfaction() {
+        return ResponseEntity.ok(satisfactionService.getAllSatisfaction());
     }
 }
