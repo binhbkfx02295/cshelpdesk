@@ -33,7 +33,7 @@ public class GlobalExceptionLogging {
 
             return result;
         } catch (Throwable ex) {
-            end = System.currentTimeMillis();
+            end = System.nanoTime();
 
             log.info("[EXCEPTION] {}ms after {}.{}()",
                     (end - start) / 1_000_000,

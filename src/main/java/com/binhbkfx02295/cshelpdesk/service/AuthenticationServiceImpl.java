@@ -7,7 +7,6 @@ import com.binhbkfx02295.cshelpdesk.dto.EmployeeDTO;
 import com.binhbkfx02295.cshelpdesk.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.entity.StatusLog;
 import com.binhbkfx02295.cshelpdesk.repository.EmployeeRepository;
-import com.binhbkfx02295.cshelpdesk.repository.StatusLogRepository;
 import com.binhbkfx02295.cshelpdesk.repository.StatusRepository;
 import com.binhbkfx02295.cshelpdesk.websocket.event.EmployeeEvent;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.security.auth.login.AccountLockedException;
-import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +28,6 @@ import java.util.*;
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final StatusRepository statusRepository;
     private final EmployeeRepository employeeRepository;
-    private final StatusLogRepository statusLogRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeMapper employeeMapper;
     private final ApplicationEventPublisher publisher;

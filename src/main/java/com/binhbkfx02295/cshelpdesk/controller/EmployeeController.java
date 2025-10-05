@@ -88,6 +88,7 @@ public class EmployeeController {
     public ResponseEntity<Void> updateOnlineStatus(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestBody StatusLogDTO logDTO ) {
+        logDTO.setUsername(user.getUsername());
         employeeService.updateOnlineStatus(logDTO);
         return ResponseEntity.ok(null);
     }

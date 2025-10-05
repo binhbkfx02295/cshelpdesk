@@ -14,9 +14,7 @@ import javax.security.auth.login.AccountLockedException;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
-
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest dto) throws AccountLockedException {

@@ -68,7 +68,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer>, JpaSpe
     Page<Ticket> findAll(Specification<Ticket> spec, Pageable pageable);
 
     @Query("""
-    SELECT new com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.TicketReportDTO(
+    SELECT new com.binhbkfx02295.cshelpdesk.dto.TicketReportDTO(
         t.id, t.firstResponseRate, t.overallResponseRate, 
         t.resolutionRate, t.createdAt)
     FROM Ticket t
@@ -82,7 +82,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer>, JpaSpe
                                                  @Param("endTime")Timestamp endTime);
 
     @Query("""
-            SELECT new com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.TicketVolumeReportDTO 
+            SELECT new com.binhbkfx02295.cshelpdesk.dto.TicketVolumeReportDTO 
             (t.id, t.createdAt) 
             FROM Ticket t 
             WHERE t.createdAt BETWEEN :fromTime AND :toTime
