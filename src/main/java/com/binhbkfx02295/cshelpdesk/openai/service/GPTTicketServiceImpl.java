@@ -1,12 +1,10 @@
 package com.binhbkfx02295.cshelpdesk.openai.service;
 
-import com.binhbkfx02295.cshelpdesk.message.entity.Message;
-import com.binhbkfx02295.cshelpdesk.openai.adapter.BaseGPTModelAdapter;
+import com.binhbkfx02295.cshelpdesk.entity.Message;
 import com.binhbkfx02295.cshelpdesk.openai.adapter.GPT41MiniAdapter;
 import com.binhbkfx02295.cshelpdesk.openai.adapter.GPT41NanoAdapter;
-import com.binhbkfx02295.cshelpdesk.openai.adapter.GPTModelAdapter;
 import com.binhbkfx02295.cshelpdesk.openai.model.GPTResult;
-import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.entity.Ticket;
+import com.binhbkfx02295.cshelpdesk.entity.Ticket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

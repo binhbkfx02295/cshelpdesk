@@ -1,6 +1,6 @@
 package com.binhbkfx02295.cshelpdesk.websocket.event;
 
-import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.TicketDashboardDTO;
+import com.binhbkfx02295.cshelpdesk.dto.TicketDashboardDTO;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

@@ -3,21 +3,16 @@ package com.binhbkfx02295.cshelpdesk.openai.adapter;
 
 import com.binhbkfx02295.cshelpdesk.openai.dto.OpenAIResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
-import com.binhbkfx02295.cshelpdesk.message.entity.Message;
-import com.binhbkfx02295.cshelpdesk.openai.config.ModelRegistryConfig;
+import com.binhbkfx02295.cshelpdesk.entity.Message;
 import com.binhbkfx02295.cshelpdesk.openai.model.ModelSettings;
 import com.binhbkfx02295.cshelpdesk.openai.model.GPTResult;
 import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
-import com.binhbkfx02295.cshelpdesk.ticket_management.category.entity.Category;
-import com.binhbkfx02295.cshelpdesk.ticket_management.emotion.entity.Emotion;
-import com.binhbkfx02295.cshelpdesk.ticket_management.satisfaction.entity.Satisfaction;
+import com.binhbkfx02295.cshelpdesk.entity.Category;
+import com.binhbkfx02295.cshelpdesk.entity.Emotion;
+import com.binhbkfx02295.cshelpdesk.entity.Satisfaction;
 
 import java.util.List;
 import java.util.stream.Collectors;

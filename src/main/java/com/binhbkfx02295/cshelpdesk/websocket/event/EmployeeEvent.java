@@ -1,9 +1,8 @@
 package com.binhbkfx02295.cshelpdesk.websocket.event;
 
-import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.StatusLogDTO;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.EmployeeDTO;
+import com.binhbkfx02295.cshelpdesk.dto.EmployeeDTO;
 
 @Getter
 @RequiredArgsConstructor
