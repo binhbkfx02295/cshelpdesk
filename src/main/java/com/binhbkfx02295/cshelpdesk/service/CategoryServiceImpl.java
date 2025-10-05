@@ -1,6 +1,5 @@
 package com.binhbkfx02295.cshelpdesk.service;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.entity.Category;
 import com.binhbkfx02295.cshelpdesk.dto.CategoryDTO;
 import com.binhbkfx02295.cshelpdesk.dto.CategoryMapper;
@@ -21,7 +20,6 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final MasterDataCache cache;
     private final CategoryMapper mapper;
 
     @Override

@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomAuthenticationProvider implements AuthenticationProvider {
-
-
     private final AuthenticationServiceImpl authenticationService;
 
 

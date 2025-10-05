@@ -1,6 +1,5 @@
 package com.binhbkfx02295.cshelpdesk.service;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.dto.SatisfactionDTO;
 import com.binhbkfx02295.cshelpdesk.dto.SatisfactionMapper;
 import com.binhbkfx02295.cshelpdesk.repository.SatisfactionRepository;
@@ -17,7 +16,6 @@ import java.util.List;
 @Transactional
 public class SatisfactionServiceImpl implements SatisfactionService {
 
-    private final MasterDataCache cache;
     private final SatisfactionMapper mapper;
     private final SatisfactionRepository repo;
 

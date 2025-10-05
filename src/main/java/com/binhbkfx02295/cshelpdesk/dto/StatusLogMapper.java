@@ -1,8 +1,6 @@
 package com.binhbkfx02295.cshelpdesk.dto;
 
-import com.binhbkfx02295.cshelpdesk.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.entity.StatusLog;
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +11,6 @@ import java.sql.Timestamp;
 public class StatusLogMapper {
 
     private final StatusMapper statusMapper;
-    private final MasterDataCache cache;
 
     public StatusLogDTO toDTO(StatusLog entity) {
         StatusLogDTO statusLogDTO = new StatusLogDTO();
@@ -24,16 +21,7 @@ public class StatusLogMapper {
     }
 
     public StatusLog toEntity(StatusLogDTO dto) {
-        StatusLog entity = new StatusLog();
-        entity.setStatus(statusMapper.toEntity(dto.getStatus()));
-        entity.setTimestamp(dto.getFrom());
-        if (entity.getTimestamp() == null) {
-            entity.setTimestamp(new Timestamp(System.currentTimeMillis()));
-        }
-        if (dto.getUsername() != null) {
-            Employee employee = cache.getEmployee(dto.getUsername());
-            entity.setEmployee(employee);
-        }
-        return entity;
+        //TODO:
+        throw new UnsupportedOperationException("TODO");
     }
 }

@@ -1,6 +1,5 @@
 package com.binhbkfx02295.cshelpdesk.service;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.dto.MessageDTO;
 import com.binhbkfx02295.cshelpdesk.entity.Message;
 import com.binhbkfx02295.cshelpdesk.dto.MessageMapper;
@@ -25,7 +24,6 @@ public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
     private final TicketRepository ticketRepository;
-    private final MasterDataCache cache;
     private final MessageMapper mapper;
     private final ApplicationEventPublisher publisher;
     private final EntityManager entityManager;
@@ -33,7 +31,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public MessageDTO addMessage(MessageDTO messageDTO) {
         Message saved = messageRepository.save(mapper.toEntity(messageDTO));
-        publisher.publishEvent(new MessageEvent(mapper.toEventDTO(cache.getMessage(saved.getId()))));
+        publisher.publishEvent(new MessageEvent(mapper.toEventDTO(saved)));
         return mapper.toDTO(saved);
     }
 

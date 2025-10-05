@@ -1,15 +1,14 @@
 package com.binhbkfx02295.cshelpdesk.service;
 
 import com.binhbkfx02295.cshelpdesk.dto.EmployeeMapper;
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.dto.LoginRequest;
 import com.binhbkfx02295.cshelpdesk.dto.LoginResponse;
 import com.binhbkfx02295.cshelpdesk.dto.EmployeeDTO;
 import com.binhbkfx02295.cshelpdesk.entity.Employee;
-import com.binhbkfx02295.cshelpdesk.entity.Status;
 import com.binhbkfx02295.cshelpdesk.entity.StatusLog;
 import com.binhbkfx02295.cshelpdesk.repository.EmployeeRepository;
 import com.binhbkfx02295.cshelpdesk.repository.StatusLogRepository;
+import com.binhbkfx02295.cshelpdesk.repository.StatusRepository;
 import com.binhbkfx02295.cshelpdesk.websocket.event.EmployeeEvent;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +28,10 @@ import java.util.*;
 @Slf4j
 @Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private final StatusRepository statusRepository;
     private final EmployeeRepository employeeRepository;
     private final StatusLogRepository statusLogRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MasterDataCache cache;
     private final EmployeeMapper employeeMapper;
     private final ApplicationEventPublisher publisher;
 
@@ -60,32 +59,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
         employee.setFailedLoginCount(0);
-        response = new LoginResponse();
 
         EmployeeDTO employeeDTO = employeeMapper.toDTO(employee);
+        StatusLog statusLog = new StatusLog();
+        statusLog.setStatus(statusRepository.getReferenceById(1));
+        statusLog.setEmployee(employee);
+        employee.getStatusLogs().add(statusLog);
+
+        employeeRepository.save(employee);
+
+        response = new LoginResponse();
         response.setEmployeeDTO(employeeDTO);
-        statusLogRepository.findFirstByEmployee_UsernameOrderByTimestampDesc( employee.getUsername()).ifPresentOrElse(
-                statusLog -> {
-
-            if (statusLog.getStatus().getId() != 1) {
-                StatusLog newLog = new StatusLog();
-                Status status = cache.getStatus(1);
-                log.info("status: {}", status.getName());
-                newLog.setStatus(status);
-                newLog.setEmployee(employee);
-                employee.getStatusLogs().add(newLog);
-            }
-        },
-                () -> {
-            StatusLog newLog = new StatusLog();
-            Status status = cache.getStatus(1);
-            newLog.setStatus(status);
-            newLog.setEmployee(employee);
-
-            employee.getStatusLogs().add(newLog);
-        });
-        log.info(String.format("Login: saved new status log for %s", employee.getUsername()));
-
         return response;
     }
 
@@ -94,23 +78,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Employee employee = employeeRepository.findWithAllStatusLog(employeeDTO.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException("Khong ton tai"));
 
-        List<StatusLog> logs = employee.getStatusLogs();
+        StatusLog newStatusLog = new StatusLog();
+        newStatusLog.setEmployee(employee);
+        newStatusLog.setStatus(statusRepository.getReferenceById(3));
 
-        StatusLog statusLog = logs.get(logs.size()-1);
-        if (statusLog.getStatus().getId() != 3) {
-            StatusLog newLog = new StatusLog();
-            Status status = cache.getStatus(3);
-            newLog.setStatus(status);
-            newLog.setEmployee(employee);
-            employee.getStatusLogs().add(newLog);
-            employeeRepository.save(employee);
-            log.info(String.format("%s log new status: %s", employeeDTO.getUsername(), status.getName()));
+        employee.getStatusLogs().add(newStatusLog);
 
-            publisher.publishEvent(new EmployeeEvent(EmployeeEvent.Action.UPDATED,
-                    employeeMapper.toDTO(cache.getEmployee(employee.getUsername()))));
-        }
-
-        log.info(String.format("%s logout success ", employeeDTO.getUsername()));
-
+        employee = employeeRepository.save(employee);
+        publisher.publishEvent(new EmployeeEvent(EmployeeEvent.Action.UPDATED,
+                employeeMapper.toDTO(employee)));
     }
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 
@@ -87,5 +88,11 @@ public class MainController {
 
     private boolean isStaticAsset(String path) {
         return path.matches(".*\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot)$");
+    }
+
+    @GetMapping("/api/ping")
+    @ResponseBody
+    public String[] ping() {
+        return new String[]{"pong"};
     }
 }

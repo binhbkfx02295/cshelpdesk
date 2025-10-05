@@ -1,6 +1,5 @@
 package com.binhbkfx02295.cshelpdesk.service;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.dto.ProgressStatusDTO;
 import com.binhbkfx02295.cshelpdesk.dto.ProgressStatusMapper;
 import com.binhbkfx02295.cshelpdesk.repository.ProgressStatusRepository;
@@ -19,7 +18,6 @@ public class ProgressStatusServiceImpl implements ProgressStatusService {
 
     private final ProgressStatusRepository repository;
     private final ProgressStatusMapper mapper;
-    private final MasterDataCache cache;
 
     @Override
     public List<ProgressStatusDTO> getAllProgressStatus() {

@@ -1,6 +1,5 @@
 package com.binhbkfx02295.cshelpdesk.service;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.dto.TagDTO;
 import com.binhbkfx02295.cshelpdesk.entity.Tag;
 import com.binhbkfx02295.cshelpdesk.dto.TagMapper;
@@ -21,7 +20,6 @@ import java.util.List;
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
-    private final MasterDataCache cache;
     private TagMapper mapper;
 
     @Override

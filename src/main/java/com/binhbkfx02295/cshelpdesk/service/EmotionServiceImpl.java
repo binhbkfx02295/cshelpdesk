@@ -1,6 +1,5 @@
 package com.binhbkfx02295.cshelpdesk.service;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.dto.EmotionDTO;
 import com.binhbkfx02295.cshelpdesk.dto.EmotionMapper;
 import com.binhbkfx02295.cshelpdesk.repository.EmotionRepository;
@@ -17,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmotionServiceImpl implements EmotionService{
 
-    private final MasterDataCache cache;
     private final EmotionMapper mapper;
     private final EmotionRepository repository;
 

@@ -2,7 +2,7 @@ package com.binhbkfx02295.cshelpdesk.websocket.listener;
 
 import com.binhbkfx02295.cshelpdesk.dto.EmployeeTicketDTO;
 import com.binhbkfx02295.cshelpdesk.entity.Employee;
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
+import com.binhbkfx02295.cshelpdesk.repository.EmployeeRepository;
 import com.binhbkfx02295.cshelpdesk.websocket.event.EmployeeEvent;
 import com.binhbkfx02295.cshelpdesk.websocket.event.MessageEvent;
 import com.binhbkfx02295.cshelpdesk.websocket.event.TicketAssignedEvent;
@@ -20,8 +20,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 public class NotificationEventListener {
-    private final MasterDataCache cache;
     private final SimpMessagingTemplate messagingTemplate;
+    private final EmployeeRepository employeeRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
@@ -33,7 +33,7 @@ public class NotificationEventListener {
                         new NotificationDTO<>("TICKET", event.getAction().name(), event.getTicket()));
             }
         } else {
-            for (Employee employee: cache.getAllEmployees().values()) {
+            for (Employee employee: employeeRepository.findAll()) {
                 messagingTemplate.convertAndSendToUser(employee.getUsername(), "/queue/tickets",
                         new NotificationDTO<>("TICKET", event.getAction().name(), event.getTicket()));
             }
@@ -55,7 +55,7 @@ public class NotificationEventListener {
                         new NotificationDTO<>("MESSAGE", "CREATED", event.getMessage()));
             }
         } else {
-            for (Employee employee: cache.getAllEmployees().values()) {
+            for (Employee employee: employeeRepository.findAll()) {
                 messagingTemplate.convertAndSendToUser(employee.getUsername(), "/queue/messages",
                         new NotificationDTO<>("MESSAGE", "CREATED", event.getMessage()));
             }
@@ -76,7 +76,7 @@ public class NotificationEventListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onTicketAssignedEvent(TicketAssignedEvent event) {
-        for (Employee employee: cache.getAllEmployees().values()) {
+        for (Employee employee: employeeRepository.findAll()) {
             if (!employee.getUsername().equalsIgnoreCase(event.getTicket().getAssignee().getUsername())) {
                 messagingTemplate.convertAndSendToUser(employee.getUsername(), "/queue/tickets",
                         new NotificationDTO<>("TICKET", "ASSIGNED", event.getTicket()));

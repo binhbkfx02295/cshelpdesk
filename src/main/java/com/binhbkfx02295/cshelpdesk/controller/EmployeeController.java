@@ -3,7 +3,6 @@ package com.binhbkfx02295.cshelpdesk.controller;
 import com.binhbkfx02295.cshelpdesk.dto.*;
 import com.binhbkfx02295.cshelpdesk.dto.EmployeeDetailDTO;
 import com.binhbkfx02295.cshelpdesk.service.EmployeeServiceImpl;
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.config.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import java.util.List;
 public class EmployeeController {
 
     private final EmployeeServiceImpl employeeService;
-    private final MasterDataCache cache;
 
 
     @PostMapping
@@ -83,13 +81,6 @@ public class EmployeeController {
     @GetMapping("/me/online-status")
     public ResponseEntity<StatusLogDTO> getOnlineStatus(
             @AuthenticationPrincipal UserPrincipal user) {
-        return ResponseEntity.ok(employeeService.getLatestOnlineStatus(user.getUsername()));
-    }
-
-    @GetMapping("/me/update-cache")
-    public ResponseEntity<StatusLogDTO> updatecache(
-            @AuthenticationPrincipal UserPrincipal user) {
-        cache.updateAllEmployees();
         return ResponseEntity.ok(employeeService.getLatestOnlineStatus(user.getUsername()));
     }
 

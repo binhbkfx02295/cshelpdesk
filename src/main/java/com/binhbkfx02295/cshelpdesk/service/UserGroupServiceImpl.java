@@ -6,7 +6,6 @@ import com.binhbkfx02295.cshelpdesk.repository.EmployeeRepository;
 import com.binhbkfx02295.cshelpdesk.entity.UserGroup;
 import com.binhbkfx02295.cshelpdesk.dto.UserGroupDTO;
 import com.binhbkfx02295.cshelpdesk.dto.UserGroupMapper;
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.repository.UserGroupRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +26,6 @@ public class UserGroupServiceImpl implements UserGroupService {
     private final EmployeeRepository employeeRepository;
     private final UserGroupMapper mapper;
     private final PermissionMapper permissionMapper;
-    private final MasterDataCache cache;
-
     @Override
     public UserGroupDTO createGroup(UserGroupDTO groupDTO) {
         UserGroup group = mapper.toEntity(groupDTO);

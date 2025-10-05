@@ -6,7 +6,6 @@ import com.binhbkfx02295.cshelpdesk.dto.StatusLogMapper;
 import com.binhbkfx02295.cshelpdesk.repository.StatusLogRepository;
 import com.binhbkfx02295.cshelpdesk.repository.StatusRepository;
 import com.binhbkfx02295.cshelpdesk.entity.UserGroup;
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.entity.Status;
 import com.binhbkfx02295.cshelpdesk.entity.StatusLog;
@@ -47,7 +46,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final UserGroupRepository userGroupRepository;
     private final StatusLogRepository statusLogRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MasterDataCache cache;
     private final EmployeeMapper mapper;
     private final StatusLogMapper statusLogMapper;
     private final ApplicationEventPublisher publisher;
@@ -67,7 +65,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //add status log
         user.setUserGroup(userGroupRepository.getReferenceById(employeeDTO.getUserGroup().getGroupId()));
-        Status status = cache.getStatus(3);
+        Status status = statusRepository.getReferenceById(3);
         StatusLog newLog = new StatusLog();
         newLog.setStatus(status);
         newLog.setEmployee(user);

@@ -1,10 +1,11 @@
 package com.binhbkfx02295.cshelpdesk.openai.adapter;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.openai.config.ModelRegistryConfig;
 import com.binhbkfx02295.cshelpdesk.openai.model.ModelSettings;
+import com.binhbkfx02295.cshelpdesk.repository.CategoryRepository;
+import com.binhbkfx02295.cshelpdesk.repository.EmotionRepository;
+import com.binhbkfx02295.cshelpdesk.repository.SatisfactionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,10 @@ public class GPT41MiniAdapter extends BaseGPTModelAdapter{
     public GPT41MiniAdapter(ModelRegistryConfig modelRegistryConfig,
                             RestTemplate restTemplate,
                             ObjectMapper objectMapper,
-                            MasterDataCache masterDataCache) {
-        super(restTemplate, objectMapper, masterDataCache);
+                            CategoryRepository categoryRepository,
+                            SatisfactionRepository satisfactionRepository,
+                            EmotionRepository emotionRepository) {
+        super(restTemplate, objectMapper, categoryRepository, satisfactionRepository, emotionRepository);
         modelSettings = modelRegistryConfig.getGpt41Mini();
     }
 

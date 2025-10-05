@@ -1,6 +1,5 @@
 package com.binhbkfx02295.cshelpdesk.util;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.entity.Status;
 import com.binhbkfx02295.cshelpdesk.entity.StatusLog;
@@ -50,7 +49,6 @@ public class MasterDataSeeder implements CommandLineRunner {
     private final EmployeeRepository employeeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final CategoryRepository categoryRepository;
-    private final MasterDataCache cache;
     private final FacebookUserRepository facebookUserRepository;
     private final TicketRepository ticketRepository;
     private final MessageRepository messageRepository;
@@ -311,40 +309,40 @@ public class MasterDataSeeder implements CommandLineRunner {
         }
     }
 
-    public void seedTickets(int num) {
-        List<Ticket> ticketList = ticketRepository.findAll();
-        if (ticketList.size() >= num) {
-            return;
-        }
-        List<FacebookUser> facebookUsers = facebookUserRepository.getAll();
-        List<Employee> employeeList = cache.getAllMessages().isEmpty() ? employeeRepository.findAll() :
-                cache.getAllEmployees().values().stream().toList();
-        List<Category> categoryList = cache.getAllCategories().isEmpty() ? categoryRepository.findAll() :
-                cache.getAllCategories().values().stream().toList();
-        List<ProgressStatus> progressStatusList = cache.getAllProgress().isEmpty() ? progressStatusRepository.findAll() :
-                cache.getAllProgress().values().stream().toList();
-        log.info("employee List: {}", employeeList.size());
-        List<Ticket> temp = new ArrayList<>();
-        for (int i = 0; i < num - ticketList.size(); i++) {
-            Faker faker = new Faker(new Locale("vi")); // Vietnamese locale
-            Employee employee = new Employee();
-            employee.setUsername(employeeList.get(i % 2).getUsername());
-            Ticket ticket = new Ticket();
-            ticket.setTitle(null); // random string
-            ticket.setAssignee(employee); //get random from employeeList
-            ticket.setFacebookUser(facebookUsers.get( i % facebookUsers.size()));
-            ticket.setCategory(categoryList.get(i % 5));
-            ticket.setProgressStatus(progressStatusList.get(i % 3));
-
-            Instant createdAt = faker.date()
-                    .between(Date.from(Instant.now().minusSeconds(3600 * 24 * 30)), Date.from(Instant.now()))
-                    .toInstant();
-
-            ticket.setCreatedAt(Timestamp.from(createdAt));
-            temp.add(ticket);
-        }
-        ticketRepository.saveAll(temp);
-    }
+//    public void seedTickets(int num) {
+//        List<Ticket> ticketList = ticketRepository.findAll();
+//        if (ticketList.size() >= num) {
+//            return;
+//        }
+//        List<FacebookUser> facebookUsers = facebookUserRepository.getAll();
+//        List<Employee> employeeList = cache.getAllMessages().isEmpty() ? employeeRepository.findAll() :
+//                cache.getAllEmployees().values().stream().toList();
+//        List<Category> categoryList = cache.getAllCategories().isEmpty() ? categoryRepository.findAll() :
+//                cache.getAllCategories().values().stream().toList();
+//        List<ProgressStatus> progressStatusList = cache.getAllProgress().isEmpty() ? progressStatusRepository.findAll() :
+//                cache.getAllProgress().values().stream().toList();
+//        log.info("employee List: {}", employeeList.size());
+//        List<Ticket> temp = new ArrayList<>();
+//        for (int i = 0; i < num - ticketList.size(); i++) {
+//            Faker faker = new Faker(new Locale("vi")); // Vietnamese locale
+//            Employee employee = new Employee();
+//            employee.setUsername(employeeList.get(i % 2).getUsername());
+//            Ticket ticket = new Ticket();
+//            ticket.setTitle(null); // random string
+//            ticket.setAssignee(employee); //get random from employeeList
+//            ticket.setFacebookUser(facebookUsers.get( i % facebookUsers.size()));
+//            ticket.setCategory(categoryList.get(i % 5));
+//            ticket.setProgressStatus(progressStatusList.get(i % 3));
+//
+//            Instant createdAt = faker.date()
+//                    .between(Date.from(Instant.now().minusSeconds(3600 * 24 * 30)), Date.from(Instant.now()))
+//                    .toInstant();
+//
+//            ticket.setCreatedAt(Timestamp.from(createdAt));
+//            temp.add(ticket);
+//        }
+//        ticketRepository.saveAll(temp);
+//    }
 
 
 }

@@ -3,7 +3,6 @@ package com.binhbkfx02295.cshelpdesk.service;
 import com.binhbkfx02295.cshelpdesk.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.dto.EmployeeMapper;
 import com.binhbkfx02295.cshelpdesk.dto.FacebookUserProfileDTO;
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.config.FacebookAPIProperties;
 import com.binhbkfx02295.cshelpdesk.dto.FacebookUserDetailDTO;
 import com.binhbkfx02295.cshelpdesk.dto.FacebookUserMapper;
@@ -12,6 +11,8 @@ import com.binhbkfx02295.cshelpdesk.dto.ProgressStatusMapper;
 import com.binhbkfx02295.cshelpdesk.dto.TicketDetailDTO;
 import com.binhbkfx02295.cshelpdesk.dto.MessageDTO;
 import com.binhbkfx02295.cshelpdesk.dto.WebHookEventDTO;
+import com.binhbkfx02295.cshelpdesk.entity.ProgressStatus;
+import com.binhbkfx02295.cshelpdesk.repository.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,8 @@ public class WebHookServiceImpl implements WebHookService {
     private final FacebookUserMapper facebookUserMapper;
     private final ProgressStatusMapper progressStatusMapper;
     private final EmployeeMapper employeeMapper;
-    private final MasterDataCache cache;
+    private final EmployeeRepository employeeRepository;
+    private final EmployeeService employeeService;
 
     @Override
     public void handleWebhook(WebHookEventDTO event) {
@@ -66,7 +68,8 @@ public class WebHookServiceImpl implements WebHookService {
 
                         facebookUser = getOrCreateFacebookUser(senderId);
                         ticket = new TicketDetailDTO();
-                        ticket.setProgressStatus(progressStatusMapper.toDTO(cache.getProgress(1)));
+                        ticket.setProgressStatus(progressStatusMapper.toDTO(ProgressStatus.builder()
+                                .id(1).build()));
                         ticket.setFacebookUser(facebookUserMapper.toDTO(facebookUser));
 
                         if (!autoAssign(ticket)) {
@@ -129,13 +132,16 @@ public class WebHookServiceImpl implements WebHookService {
 
     private boolean autoAssign(TicketDetailDTO ticket) {
         //get employees with role staff and is online
-        List<Employee> employeeList = cache.getAllEmployees().values().stream().filter(employee -> {
-            return employee.getStatusLogs().get(employee.getStatusLogs().size()-1).getStatus().getId() == 1 &&
-            employee.getUserGroup().getCode().equalsIgnoreCase("staff");
-        }).toList();
+        List<Employee> employeeList = employeeRepository.findAllWithTop1EmployeeStatusLog()
+                .stream()
+                .filter(employee ->
+            employee.getStatusLogs().get(0).getStatus().getId() == 1 &&
+            employee.getUserGroup().getCode().equalsIgnoreCase("staff")
+        )
+        .toList();
 
         if (employeeList.isEmpty()) {
-            log.info("no online employee");
+            log.warn("no online employee");
             return false;
         }
 
@@ -144,9 +150,10 @@ public class WebHookServiceImpl implements WebHookService {
         int minTickets = Integer.MAX_VALUE;
 
         for (Employee employee : employeeList) {
-            long count = cache.getDashboardTickets().values().stream()
-                    .filter(dto -> dto.getAssignee() != null &&
-                            dto.getAssignee().getUsername().equalsIgnoreCase(employee.getUsername()))
+            long count = employeeService.getForDashboard()
+                    .stream()
+                    .filter(dto ->
+                            dto.getUsername().equalsIgnoreCase(employee.getUsername()))
                     .count();
             if (count < minTickets) {
                 minTickets = (int) count;

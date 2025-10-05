@@ -2,6 +2,9 @@
 package com.binhbkfx02295.cshelpdesk.openai.adapter;
 
 import com.binhbkfx02295.cshelpdesk.openai.dto.OpenAIResponse;
+import com.binhbkfx02295.cshelpdesk.repository.CategoryRepository;
+import com.binhbkfx02295.cshelpdesk.repository.EmotionRepository;
+import com.binhbkfx02295.cshelpdesk.repository.SatisfactionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -9,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import com.binhbkfx02295.cshelpdesk.entity.Message;
 import com.binhbkfx02295.cshelpdesk.openai.model.ModelSettings;
 import com.binhbkfx02295.cshelpdesk.openai.model.GPTResult;
-import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.entity.Category;
 import com.binhbkfx02295.cshelpdesk.entity.Emotion;
 import com.binhbkfx02295.cshelpdesk.entity.Satisfaction;
@@ -20,14 +22,22 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class BaseGPTModelAdapter implements GPTModelAdapter {
-    protected final RestTemplate restTemplate;
-    protected final ObjectMapper objectMapper;
-    protected final MasterDataCache masterDataCache;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+    private final CategoryRepository categoryRepository;
+    private final SatisfactionRepository satisfactionRepository;
+    private final EmotionRepository emotionRepository;
 
-    public BaseGPTModelAdapter(RestTemplate restTemplate, ObjectMapper objectMapper, MasterDataCache masterDataCache) {
+    public BaseGPTModelAdapter(RestTemplate restTemplate,
+                               ObjectMapper objectMapper,
+                               CategoryRepository categoryRepository,
+                               SatisfactionRepository satisfactionRepository,
+                               EmotionRepository emotionRepository) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
-        this.masterDataCache = masterDataCache;
+        this.categoryRepository = categoryRepository;
+        this.satisfactionRepository = satisfactionRepository;
+        this.emotionRepository = emotionRepository;
     }
 
     public GPTResult analyze(List<Message> messages) {
@@ -50,17 +60,17 @@ public abstract class BaseGPTModelAdapter implements GPTModelAdapter {
 
         sb.append("Bạn là chuyên gia đánh giá CSKH, hãy phân tích hội thoại giữa Nhân viên(1) và Khách hàng(0) và trích xuất:\n");
 
-        List<Category> categories = masterDataCache.getAllCategories().values().stream().toList();
+        List<Category> categories = categoryRepository.findAll();
         sb.append("- Category (id:name): (");
         sb.append(categories.stream().map(c -> c.getId() + ":" + c.getName()).collect(Collectors.joining(",")));
         sb.append(")\n");
 
-        List<Emotion> emotions = masterDataCache.getAllEmotions().values().stream().toList();
+        List<Emotion> emotions = emotionRepository.findAll();
         sb.append("- Emotion (id:name): (");
         sb.append(emotions.stream().map(e -> e.getId() + ":" + e.getName()).collect(Collectors.joining(",")));
         sb.append(")\n");
 
-        List<Satisfaction> satisfactions = masterDataCache.getAllSatisfactions().values().stream().toList();
+        List<Satisfaction> satisfactions = satisfactionRepository.findAll();
         sb.append("- Satisfaction (id:name): (");
         sb.append(satisfactions.stream().map(s -> s.getId() + ":" + s.getName()).collect(Collectors.joining(",")));
         sb.append(")\n");
