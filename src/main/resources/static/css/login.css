@@ -1,17 +1,111 @@
-.login-page {
-  background: linear-gradient(135deg, #007bff, #6c757d);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+html {
+            font-family: "Quicksand", sans-serif;
+            font-optical-sizing: auto;
+        }
 
-  .login-container {
-    width: 100%;
-    max-width: 400px;
-  }
+        body {
+            background: url('img/img-auth-bg.jpg') no-repeat center fixed;
+            background-size: cover;
+            color: #3c3f45a8;
 
-  .login-card {
-    background: #fff;
-    border-radius: 8px;
-  }
-}
+            font-family: "Quicksand", sans-serif;
+            font-optical-sizing: auto;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: -1;
+        }
+
+        .login-box {
+            width: 400px;
+            height: 600px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            transform: translate(-50%, -50%);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1.8rem;
+            color: #2c3e50;
+        }
+
+        .alert {
+            font-size: 0.9rem;
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+
+        #show-password,
+        #hide-password {
+            display: none;
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translate(-50%, -50%);
+            color: #979797;
+        }
+
+        #show-password {
+            display: block;
+        }
+
+        input[type=text],
+        input[type=password] {
+            font-size: 15px;
+            color: #494949;
+            border: 1px solid #dbe0e5;
+            padding: 10px 15px;
+            width: 100%;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        input::placeholder {
+            color: #c4cacf
+        }
+
+        input:focus,
+        input:hover {
+            border: 1px solid #6c7a88;
+            outline: none;
+        }
+
+        i#show-password,
+        i#hide-password {
+            font-size: 18px;
+            transition: all 0.5s;
+        }
+
+        i#show-password:hover,
+        i#hide-password:hover {
+            color: #343434;
+        }
+
+        .documentation {
+            font-size: 16px;
+        }
+
+         a {
+            text-decoration: none !important;
+        }
+
+        svg {
+            width: 85px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #98a5c3
+        }

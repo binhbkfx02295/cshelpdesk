@@ -8,6 +8,6 @@ public class APIResponseEntityHelper {
     }
 
     public static <T> ResponseEntity<APIResultSet<T>> from(APIResultSet<T> resultSet) {
-        return ResponseEntity.status(resultSet.getHttpCode()).body(resultSet);
+        return ResponseEntity.status(resultSet.getCode()).body(resultSet);
     }
 }

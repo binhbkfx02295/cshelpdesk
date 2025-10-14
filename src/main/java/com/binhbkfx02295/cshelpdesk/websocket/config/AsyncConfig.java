@@ -1,4 +1,4 @@
-package com.binhbkfx02295.cshelpdesk.infrastructure.websocket.config;
+package com.binhbkfx02295.cshelpdesk.websocket.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;

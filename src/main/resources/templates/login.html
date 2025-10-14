@@ -18,120 +18,8 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
 
-    <style>
-        html {
-            font-family: "Quicksand", sans-serif;
-            font-optical-sizing: auto;
-        }
-
-        body {
-            background: url('img/img-auth-bg.jpg') no-repeat center fixed;
-            background-size: cover;
-            color: #3c3f45a8;
-
-            font-family: "Quicksand", sans-serif;
-            font-optical-sizing: auto;
-        }
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: -1;
-        }
-
-        .login-box {
-            width: 400px;
-            height: 600px;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            transform: translate(-50%, -50%);
-            position: fixed;
-            top: 50%;
-            left: 50%;
-        }
-
-        .logo {
-            font-weight: 600;
-            font-size: 1.8rem;
-            color: #2c3e50;
-        }
-
-        .alert {
-            font-size: 0.9rem;
-        }
-
-        .is-invalid {
-            border-color: #dc3545 !important;
-        }
-
-        #show-password,
-        #hide-password {
-            display: none;
-            position: absolute;
-            top: 50%;
-            right: 0;
-            transform: translate(-50%, -50%);
-            color: #979797;
-        }
-
-        #show-password {
-            display: block;
-        }
-
-        input[type=text],
-        input[type=password] {
-            font-size: 15px;
-            color: #494949;
-            border: 1px solid #dbe0e5;
-            padding: 10px 15px;
-            width: 100%;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        input::placeholder {
-            color: #c4cacf
-        }
-
-        input:focus,
-        input:hover {
-            border: 1px solid #6c7a88;
-            outline: none;
-        }
-
-        i#show-password,
-        i#hide-password {
-            font-size: 18px;
-            transition: all 0.5s;
-        }
-
-        i#show-password:hover,
-        i#hide-password:hover {
-            color: #343434;
-        }
-
-        .documentation {
-            font-size: 16px;
-        }
-
-         a {
-            text-decoration: none !important;
-        }
-
-        svg {
-            width: 85px;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: #98a5c3
-        }
-    </style>
 </head>
 <body>
 
@@ -169,8 +57,6 @@
         <div th:if="${param.timeout}" class="alert alert-warning">Phiên đăng nhập đã hết hạn.</div>
         <div th:if="${param.expired}" class="alert alert-warning">Tài khoản đã đăng nhập ở nơi khác.</div>
         <div th:if="${session.loginError}" class="alert alert-danger" th:text="${session.loginError}"></div>
-
-
         <form th:action="@{/process-login}" method="post" id="loginForm">
             <div class="mb-4">
                 <input type="text" class="" id="username" name="username" placeholder="Tên đăng nhập"
@@ -206,86 +92,8 @@
     </div>
 </div>
 <!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#loginForm').on('submit', function (e) {
-            const usernameEl = $('#username');
-            const passwordEl = $('#password');
-            const username = usernameEl.val().trim();
-            const password = passwordEl.val().trim();
-
-            const usernameRegex = /^[a-zA-Z0-9]{4,8}$/;
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+=,./;'[\]<>:"{}]).{8,}$/;
-
-            let isValid = true;
-            const popoverOptions = {
-                trigger: 'manual',
-                placement: 'right'
-            };
-
-            function showPopover(el, msg) {
-                el.addClass('is-invalid');
-                el.attr('data-bs-content', msg);
-                let pop = bootstrap.Popover.getInstance(el[0]);
-                if (!pop) {
-                    pop = new bootstrap.Popover(el[0], popoverOptions);
-                }
-                pop.setContent({ '.popover-body': msg });
-                pop.show();
-            }
-
-
-
-            function clearPopover(el) {
-                el.removeClass('is-invalid');
-                let pop = bootstrap.Popover.getInstance(el[0]);
-                if (pop) pop.hide();
-            }
-
-            clearPopover(usernameEl);
-            clearPopover(passwordEl);
-            console.log(username);
-            console.log(password);
-            if (!usernameRegex.test(username)) {
-                showPopover(usernameEl, "Tên đăng nhập phải từ 4-8 ký tự, chỉ gồm chữ cái và số.");
-                isValid = false;
-            }
-
-            if (!passwordRegex.test(password)) {
-                showPopover(passwordEl, "Mật khẩu phải từ 8 ký tự, có chữ hoa, chữ thường và ký tự đặc biệt.");
-                isValid = false;
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-                if (usernameEl.hasClass('is-invalid')) {
-                    usernameEl.focus();
-                } else {
-                    passwordEl.focus();
-                }
-            }
-        });
-    });
-
-    function showPassword() {
-        const input = document.getElementById('password');
-        console.log("show password", input)
-        input.type = 'text';
-        $("#hide-password").css({"display": "block"});
-        $("#show-password").css({"display": "none"});
-    }
-
-
-
-    function hidePassword() {
-        const input = document.getElementById('password');
-        console.log("hide password", input)
-        input.type = 'password';
-        $("#show-password").css({"display": "block"});
-        $("#hide-password").css({"display": "none"});
-    }
-
+<script src="/js/script.js">
 </script>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </html>

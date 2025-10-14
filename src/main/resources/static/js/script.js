@@ -3420,7 +3420,8 @@ function initSetting() {
     openAPIxhr(HTTP_GET_METHOD, `${API_EMPLOYEE}?username=${username}`, function (response) {
       successToast(response.message);
       console.log("... employee detail here: ", response.data)
-      employeeDetailModal.show();
+      employeeDetailModal.show();-
+
       const container = document.getElementById("employeeDetailModal")
       const usernameField = container.querySelector(".username input");
       const usergroupField = container.querySelector(".userGroup input");

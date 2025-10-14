@@ -11,7 +11,8 @@ import java.io.IOException;
 
 @Controller
 @RequiredArgsConstructor
-public class MainController {
+public class
+MainController {
 
     @GetMapping("/")
     public void index(HttpServletResponse response) throws IOException {

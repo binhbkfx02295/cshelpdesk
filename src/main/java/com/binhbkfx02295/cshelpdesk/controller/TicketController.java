@@ -26,12 +26,35 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.List;
 @RestController
-@RequestMapping("/api/ticket")
+@RequestMapping("/api/tickets")
 @RequiredArgsConstructor
 @Slf4j
 public class TicketController {
 
     private final TicketServiceImpl ticketService;
+
+
+
+    @GetMapping(value = "/search")
+    public ResponseEntity<PaginationResponse<TicketListDTO>> search(
+            @ModelAttribute TicketSearchCriteria criteria,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ticketService.searchTickets(criteria, pageable));
+    }
+
+    @GetMapping(value = "/search-report")
+    public ResponseEntity<PaginationResponse<TicketListDTO>> search(
+            @ModelAttribute TicketSearchCriteria criteria) {
+        return ResponseEntity.ok(ticketService.searchTickets(criteria, Pageable.unpaged()));
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<TicketDashboardDTO>> dashboard(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        //TODO: replace with jwt stateless
+        return ResponseEntity.ok(ticketService.getForDashboard(userPrincipal.getUsername()));
+    }
 
     @GetMapping()
     public ResponseEntity<TicketDetailDTO> getById(@RequestParam(value = "id") int id) {
@@ -54,42 +77,21 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.findAllByFacebookUserId(id));
     }
 
-    @PutMapping("/{ticketId}/note")
-    public ResponseEntity<?> addNote(@PathVariable int ticketId, @RequestBody NoteDTO noteDto) {
-        ticketService.addNoteToTicket(ticketId, noteDto);
-        return ResponseEntity.ok(null);
-    }
-
-    @DeleteMapping("/{ticketId}/note/{noteId}")
-    public ResponseEntity<?> removeNote(@PathVariable int ticketId, @PathVariable int noteId) {
-        ticketService.deleteNoteFromTicket(ticketId, noteId);
-        return ResponseEntity.ok(null);
-    }
-
-    @GetMapping("/{ticketId}/note")
+    @GetMapping("/{ticketId}/notes")
     public ResponseEntity<Set<NoteDTO>> getAllNotes(@PathVariable int ticketId) {
         return ResponseEntity.ok(ticketService.getNotes(ticketId));
     }
 
-    @GetMapping(value = "/search")
-    public ResponseEntity<PaginationResponse<TicketListDTO>> search(
-            @ModelAttribute TicketSearchCriteria criteria,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(ticketService.searchTickets(criteria, pageable));
+    @PostMapping("/{ticketId}/notes")
+    public ResponseEntity<Void> addNote(@PathVariable int ticketId, @RequestBody NoteDTO noteDto) {
+        ticketService.addNoteToTicket(ticketId, noteDto);
+        return ResponseEntity.ok(null);
     }
 
-    @GetMapping(value = "/search-report")
-    public ResponseEntity<PaginationResponse<TicketListDTO>> search(
-            @ModelAttribute TicketSearchCriteria criteria) {
-        return ResponseEntity.ok(ticketService.searchTickets(criteria, Pageable.unpaged()));
-    }
-
-    @GetMapping("/dashboard")
-    public ResponseEntity<List<TicketDashboardDTO>> dashboard(
-            @AuthenticationPrincipal UserPrincipal userPrincipal
-            ) {
-        //TODO: replace with jwt stateless
-        return ResponseEntity.ok(ticketService.getForDashboard(userPrincipal.getUsername()));
+    @DeleteMapping("/{ticketId}/notes/{noteId}")
+    public ResponseEntity<?> removeNote(@PathVariable int ticketId, @PathVariable int noteId) {
+        ticketService.deleteNoteFromTicket(ticketId, noteId);
+        return ResponseEntity.ok(null);
     }
 
     @PostMapping("/export-excel")
@@ -115,6 +117,8 @@ public class TicketController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
 
 
 }

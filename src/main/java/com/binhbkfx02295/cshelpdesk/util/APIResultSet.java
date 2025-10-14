@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,20 +25,29 @@ public class APIResultSet<D> {
     private static final String MSG_INTERNAL_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.toString();
     private static final String MSG_UNAUTHORIZED = HttpStatus.UNAUTHORIZED.toString();
 
-    private int httpCode;
+    private LocalDate serverTime = LocalDate.now();
+    private String path;
+    private int code;
     private String message;
     private D data;
+
+    public APIResultSet(int code, String message, D data) {
+        this.serverTime = LocalDate.now();
+        this.code = code;
+        this.message = message;
+        this.data = data;
+    }
 
     public static <D> APIResultSet<D> ok() {
         return new APIResultSet<>(OK, MSG_OK, null);
     }
 
     public static <D> APIResultSet<D> ok(String msg, D data) {
-        return new APIResultSet<>(OK,msg, data);
+        return new APIResultSet<>(OK, msg, data);
     }
 
     public static <D> APIResultSet<D> notAllowed(String message) {
-        return new APIResultSet<>(OK, message, null);
+        return new APIResultSet<>(FORBIDDEN, message, null);
     }
 
     public static <D> APIResultSet<D> notFound() {
@@ -62,6 +73,7 @@ public class APIResultSet<D> {
     public static <D> APIResultSet<D> badRequest(String message) {
         return new APIResultSet<>(BAD_REQUEST, message, null);
     }
+
     public static <D> APIResultSet<D> badRequest(String message, D data) {
         return new APIResultSet<>(BAD_REQUEST, message, data);
     }
@@ -83,6 +95,6 @@ public class APIResultSet<D> {
     }
 
     public boolean isSuccess() {
-        return httpCode == 200;
+        return code == OK;
     }
 }

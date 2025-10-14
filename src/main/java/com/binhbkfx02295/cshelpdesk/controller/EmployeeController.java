@@ -42,13 +42,6 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getForDashboard());
     }
 
-    //Employee profile
-    @GetMapping("/me")
-    public ResponseEntity<UserPrincipal> getUserProfile(
-            @AuthenticationPrincipal UserPrincipal user) {
-        return ResponseEntity.ok(user);
-    }
-
     @PutMapping("/me")
     public ResponseEntity<EmployeeDetailDTO> updateProfile(
             @AuthenticationPrincipal UserPrincipal user,
