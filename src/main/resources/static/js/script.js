@@ -2523,6 +2523,7 @@ function initReport() {
   const ticketByHourContainer = document.querySelector(".chart-item#ticketByHour")
   const ticketByWeekdayContainer = document.querySelector(".chart-item#ticketByWeekday")
   const ticketByDayContainer = document.querySelector(".chart-item#ticketByDay")
+
   initChart(ticketByHourContainer, `${API_REPORT}/ticket-by-hour`);
   initChart(ticketByWeekdayContainer, `${API_REPORT}/ticket-by-weekday`);
   initChart(ticketByDayContainer, `${API_REPORT}/ticket-by-day`);

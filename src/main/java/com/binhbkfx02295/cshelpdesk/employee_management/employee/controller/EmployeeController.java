@@ -48,7 +48,6 @@ public class EmployeeController {
             @AuthenticationPrincipal UserPrincipal user) {
         return APIResponseEntityHelper.from(APIResultSet.ok("OK", user));
     }
-
     @GetMapping("/me/online-status")
     public ResponseEntity<APIResultSet<StatusLogDTO>> getOnlineStatus(
             @AuthenticationPrincipal UserPrincipal user) {

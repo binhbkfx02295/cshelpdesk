@@ -31,4 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+<<<<<<< HEAD
 logs/
+=======
+logs/
+>>>>>>> 1a53e29 (updated)
