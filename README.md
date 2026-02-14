@@ -125,6 +125,8 @@ docker run --name cshelpdesk-mysql \
 
 Create or update `src/main/resources/application.properties`:
 
+> **Important**: The example below is for reference only. For development, create your own `application.properties` file with your actual credentials. Ensure `application.properties` is in `.gitignore` to prevent accidental credential commits. Consider creating an `application.properties.example` file with placeholder values for team reference.
+
 ```properties
 # Application
 spring.application.name=cshelpdesk
