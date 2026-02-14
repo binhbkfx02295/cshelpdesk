@@ -145,6 +145,8 @@ spring.jackson.time-zone=Asia/Ho_Chi_Minh
 spring.jackson.serialization.write-dates-as-timestamps=true
 
 # Facebook API Configuration
+# WARNING: Never commit real credentials to version control!
+# Use environment variables or secret management systems in production
 facebook.api.app-id=YOUR_FACEBOOK_APP_ID
 facebook.api.app-secret=YOUR_FACEBOOK_APP_SECRET
 facebook.api.page-id=YOUR_FACEBOOK_PAGE_ID
@@ -174,6 +176,8 @@ logging.file.max-size=10MB
 logging.file.total-size-cap=100MB
 logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
 ```
+
+> **Security Note**: Never commit sensitive credentials to version control. Always use environment variables or secure secret management systems for production deployments.
 
 ### Environment Variables (Recommended for Production)
 
@@ -218,7 +222,7 @@ docker-compose up --build -d
 
 **Access the Application:**
 - **Main Application**: http://localhost:8080
-- **API Documentation**: http://localhost:8080/swagger-ui/
+- **API Documentation**: http://localhost:8080/swagger-ui/index.html
 - **Health Check**: http://localhost:8080/actuator/health
 
 ## 📂 Project Structure
@@ -282,7 +286,7 @@ The application uses SpringDoc OpenAPI for API documentation.
 
 **Access Swagger UI:**
 ```
-http://localhost:8080/swagger-ui/
+http://localhost:8080/swagger-ui/index.html
 ```
 
 **Access OpenAPI Specification:**
