@@ -218,7 +218,7 @@ docker-compose up --build -d
 
 **Access the Application:**
 - **Main Application**: http://localhost:8080
-- **API Documentation**: http://localhost:8080/swagger-ui.html
+- **API Documentation**: http://localhost:8080/swagger-ui/
 - **Health Check**: http://localhost:8080/actuator/health
 
 ## 📂 Project Structure
@@ -282,7 +282,7 @@ The application uses SpringDoc OpenAPI for API documentation.
 
 **Access Swagger UI:**
 ```
-http://localhost:8080/swagger-ui.html
+http://localhost:8080/swagger-ui/
 ```
 
 **Access OpenAPI Specification:**
