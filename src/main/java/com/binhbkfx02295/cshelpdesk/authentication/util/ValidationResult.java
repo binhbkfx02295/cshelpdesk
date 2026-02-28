@@ -1,4 +1,4 @@
-package com.binhbkfx02295.cshelpdesk.employee_management.authentication.util;
+package com.binhbkfx02295.cshelpdesk.authentication.util;
 
 import lombok.Data;
 

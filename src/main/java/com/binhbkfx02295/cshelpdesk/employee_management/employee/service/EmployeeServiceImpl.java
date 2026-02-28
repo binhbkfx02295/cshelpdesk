@@ -1,5 +1,6 @@
 package com.binhbkfx02295.cshelpdesk.employee_management.employee.service;
 
+import com.binhbkfx02295.cshelpdesk.authentication.dto.UserPrincipal;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.*;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.EmployeeDetailDTO;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.StatusLogMapper;
@@ -18,6 +19,10 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +37,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl implements EmployeeService, UserDetailsService {
 
     private final EmployeeRepository employeeRepository;
     private final UserGroupRepository userGroupRepository;
@@ -257,6 +262,21 @@ public class EmployeeServiceImpl implements EmployeeService {
             result = APIResultSet.internalError();
         }
         return result;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return employeeRepository.findWithUserGroupAndPermissionsByUsername(username)
+                .map(e -> new UserPrincipal(
+                        e.getUsername(),
+                        e.getName(),
+                        e.getDescription(),
+                        e.getUserGroup().getPermissions()
+                                .stream()
+                                .map(p -> new SimpleGrantedAuthority("ROLE_" + p.getName()))
+                                .toList(),
+                        e))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
 

@@ -1,10 +1,9 @@
-package com.binhbkfx02295.cshelpdesk.employee_management.authentication.service;
+package com.binhbkfx02295.cshelpdesk.authentication.service;
 
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginResponseDTO;
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.util.ValidationResult;
-import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.EmployeeDTO;
+import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginResponseDTO;
+import com.binhbkfx02295.cshelpdesk.authentication.util.ValidationResult;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
-import com.binhbkfx02295.cshelpdesk.employee_management.authentication.dto.LoginRequestDTO;
+import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginRequestDTO;
 
 
 import java.util.Locale;
@@ -24,7 +23,7 @@ public interface AuthenticationService {
      * Đăng xuất và huỷ session hiện tại
      * @return APIResultSet<Void>
      */
-    APIResultSet<Void> logout(EmployeeDTO employeeDTO);
+    APIResultSet<Void> logout(String username);
     /**
      * Chỉ dùng để kiểm tra lỗi validate khi cần test
      * @param request request login

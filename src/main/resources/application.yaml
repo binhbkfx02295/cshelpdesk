@@ -36,9 +36,6 @@ spring:
     basename: ${SPRING_MESSAGES_BASENAME}
     encoding: ${SPRING_MESSAGES_ENCODING}
 
-  mvc:
-    locale: ${SPRING_MVC_LOCALE}
-    locale-resolver: ${SPRING_MVC_LOCALE_RESOLVER}
 
 server:
   servlet:

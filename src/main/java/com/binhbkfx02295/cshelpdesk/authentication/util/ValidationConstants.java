@@ -1,4 +1,4 @@
-package com.binhbkfx02295.cshelpdesk.employee_management.authentication.util;
+package com.binhbkfx02295.cshelpdesk.authentication.util;
 
 public interface ValidationConstants {
     String USERNAME_PATTERN = "^[a-zA-Z0-9]{4,}$";
