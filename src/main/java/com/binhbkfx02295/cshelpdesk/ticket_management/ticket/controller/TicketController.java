@@ -1,10 +1,10 @@
 package com.binhbkfx02295.cshelpdesk.ticket_management.ticket.controller;
 
-import com.binhbkfx02295.cshelpdesk.infrastructure.security.auth.UserPrincipal;
 import com.binhbkfx02295.cshelpdesk.ticket_management.note.dto.NoteDTO;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.*;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.entity.Ticket;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.service.TicketServiceImpl;
+import com.binhbkfx02295.cshelpdesk.authentication.dto.UserPrincipal;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResponseEntityHelper;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.PaginationResponse;

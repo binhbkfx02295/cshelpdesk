@@ -1,0 +1,94 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME}
+    facebook-page-api: ${SPRING_APPLICATION_FACEBOOK_PAGE_API}
+
+  datasource:
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    # url: ${SPRING_DATASOURCE_URL}
+    # username: ${SPRING_DATASOURCE_USERNAME}
+    # password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jackson:
+    time-zone: ${SPRING_JACKSON_TIME_ZONE}
+    serialization:
+      write-dates-as-timestamps: ${SPRING_JACKSON_SERIALIZATION_WRITE_DATES_AS_TIMESTAMPS}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    show-sql: ${SPRING_JPA_SHOW_SQL}
+    properties:
+      hibernate:
+        format_sql: ${SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL}
+
+  thymeleaf:
+    prefix: ${SPRING_THYMELEAF_PREFIX}
+    suffix: ${SPRING_THYMELEAF_SUFFIX}
+    cache: ${SPRING_THYMELEAF_CACHE}
+    encoding: ${SPRING_THYMELEAF_ENCODING}
+    mode: ${SPRING_THYMELEAF_MODE}
+
+  messages:
+    basename: ${SPRING_MESSAGES_BASENAME}
+    encoding: ${SPRING_MESSAGES_ENCODING}
+
+
+server:
+  servlet:
+    session:
+      timeout: ${SERVER_SERVLET_SESSION_TIMEOUT}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT}
+    org.springframework.web.socket: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_SOCKET}
+    org.springframework.messaging: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_MESSAGING}
+  file:
+    name: ${LOGGING_FILE_NAME}
+    max-size: ${LOGGING_FILE_MAX_SIZE}
+    total-size-cap: ${LOGGING_FILE_TOTAL_SIZE_CAP}
+  pattern:
+    file: "${LOGGING_PATTERN_FILE}"
+
+facebook:
+  api:
+    app-id: ${FACEBOOK_API_APP_ID}
+    app-secret: ${FACEBOOK_API_APP_SECRET}
+    page-id: ${FACEBOOK_API_PAGE_ID}
+    default-short-token: ${FACEBOOK_API_DEFAULT_SHORT_TOKEN}
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED}
+    path: ${SPRINGDOC_API_DOCS_PATH}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED}
+    path: ${SPRINGDOC_SWAGGER_UI_PATH}
+
+openai:
+  models:
+    gpt41nano:
+      api-key: ${OPENAI_API_KEY}
+      model-name: ${OPENAI_MODELS_GPT41NANO_MODEL_NAME}
+      rate-per-1k-tokens: ${OPENAI_MODELS_GPT41NANO_RATE_PER_1K_TOKENS}
+    gpt41mini:
+      api-key: ${OPENAI_API_KEY}
+      model-name: ${OPENAI_MODELS_GPT41MINI_MODEL_NAME}
+      rate-per-1k-tokens: ${OPENAI_MODELS_GPT41MINI_RATE_PER_1K_TOKENS}
+    gpt4omini:
+      api-key: ${OPENAI_API_KEY}
+      model-name: ${OPENAI_MODELS_GPT4OMINI_MODEL_NAME}
+      rate-per-1k-tokens: ${OPENAI_MODELS_GPT4OMINI_RATE_PER_1K_TOKENS}
+
+cshelpdesk:
+  websocket:
+    external-broker:
+      enabled: ${CSHELPDESK_WEBSOCKET_EXTERNAL_BROKER_ENABLED}
+    broker:
+      relay:
+        host: ${CSHELPDESK_WEBSOCKET_BROKER_RELAY_HOST}
+        port: ${CSHELPDESK_WEBSOCKET_BROKER_RELAY_PORT}
