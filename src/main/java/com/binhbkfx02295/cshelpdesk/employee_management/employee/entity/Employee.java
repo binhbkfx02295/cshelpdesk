@@ -8,10 +8,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -19,7 +23,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Employee {
+public class Employee implements UserDetails{
 
     private String name;
     @Id
@@ -49,4 +53,17 @@ public class Employee {
     public String toString() {
         return "Employee{}";
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>(getUserGroup().getPermissions().stream()
+                .map(p -> new SimpleGrantedAuthority(p.getName()))
+                .toList());
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + getUserGroup().getName()));
+        return authorities;
+    }
+
+    @Override public boolean isAccountNonLocked() { return isActive(); }
+
+    
 }

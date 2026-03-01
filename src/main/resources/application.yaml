@@ -47,12 +47,6 @@ logging:
     root: ${LOGGING_LEVEL_ROOT}
     org.springframework.web.socket: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_SOCKET}
     org.springframework.messaging: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_MESSAGING}
-  file:
-    name: ${LOGGING_FILE_NAME}
-    max-size: ${LOGGING_FILE_MAX_SIZE}
-    total-size-cap: ${LOGGING_FILE_TOTAL_SIZE_CAP}
-  pattern:
-    file: "${LOGGING_PATTERN_FILE}"
 
 facebook:
   api:

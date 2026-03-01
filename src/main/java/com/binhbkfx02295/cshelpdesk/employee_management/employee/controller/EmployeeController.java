@@ -1,8 +1,9 @@
 package com.binhbkfx02295.cshelpdesk.employee_management.employee.controller;
 
-import com.binhbkfx02295.cshelpdesk.authentication.dto.UserPrincipal;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.*;
+import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.EmployeeDetailDTO;
+import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.EmployeeMapper;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.service.EmployeeServiceImpl;
 import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResponseEntityHelper;
@@ -24,6 +25,7 @@ public class EmployeeController {
 
     private final EmployeeServiceImpl employeeService;
     private final MasterDataCache cache;
+    private final EmployeeMapper employeeMapper;
 
     @PreAuthorize("hasRole('SUPERVISOR')")
     @GetMapping("")
@@ -44,19 +46,19 @@ public class EmployeeController {
 
     //Employee profile
     @GetMapping("/me")
-    public ResponseEntity<APIResultSet<UserPrincipal>> getUserProfile(
-            @AuthenticationPrincipal UserPrincipal user) {
-        return APIResponseEntityHelper.from(APIResultSet.ok("OK", user));
+    public ResponseEntity<APIResultSet<EmployeeDetailDTO>> getUserProfile(
+            @AuthenticationPrincipal Employee user) {
+        return APIResponseEntityHelper.from(APIResultSet.ok("OK", employeeMapper.toDetailDTO(user)));
     }
     @GetMapping("/me/online-status")
     public ResponseEntity<APIResultSet<StatusLogDTO>> getOnlineStatus(
-            @AuthenticationPrincipal UserPrincipal user) {
+            @AuthenticationPrincipal Employee user) {
         return APIResponseEntityHelper.from(employeeService.getLatestOnlineStatus(user.getUsername()));
     }
 
     @GetMapping("/me/update-cache")
     public ResponseEntity<APIResultSet<StatusLogDTO>> updatecache(
-            @AuthenticationPrincipal UserPrincipal user) {
+            @AuthenticationPrincipal Employee user) {
         cache.updateAllEmployees();
         return APIResponseEntityHelper.from(employeeService.getLatestOnlineStatus(user.getUsername()));
     }
@@ -71,7 +73,7 @@ public class EmployeeController {
 
     @PutMapping("/me")
     public ResponseEntity<APIResultSet<EmployeeDetailDTO>> updateProfile(
-            @AuthenticationPrincipal UserPrincipal user,
+            @AuthenticationPrincipal Employee user,
             @RequestBody EmployeeDTO employeeDTO) {
         return APIResponseEntityHelper.from(employeeService.updateUser(user.getUsername(), employeeDTO));
     }
@@ -87,7 +89,7 @@ public class EmployeeController {
 
     @PutMapping("/me/password")
     public ResponseEntity<APIResultSet<Void>> changePassword(
-            @AuthenticationPrincipal UserPrincipal user,
+            @AuthenticationPrincipal Employee user,
             @RequestBody ChangePasswordDTO changePasswordDTO) {
         return APIResponseEntityHelper.from(employeeService.changePassword(
                 user.getUsername(),
@@ -97,7 +99,7 @@ public class EmployeeController {
 
     @PutMapping("/me/online-status")
     public ResponseEntity<APIResultSet<Void>> updateOnlineStatus(
-            @AuthenticationPrincipal UserPrincipal user,
+            @AuthenticationPrincipal Employee user,
             @RequestBody StatusLogDTO logDTO ) {
         logDTO.setUsername(user.getUsername());
         return APIResponseEntityHelper.from(employeeService.updateOnlineStatus(logDTO));
