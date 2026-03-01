@@ -4,7 +4,6 @@ import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.Employee
 import com.binhbkfx02295.cshelpdesk.infrastructure.common.cache.MasterDataCache;
 import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginRequestDTO;
 import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginResponseDTO;
-import com.binhbkfx02295.cshelpdesk.authentication.dto.UserPrincipal;
 import com.binhbkfx02295.cshelpdesk.authentication.util.ValidationHelper;
 import com.binhbkfx02295.cshelpdesk.authentication.util.ValidationResult;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.Employee;
@@ -56,8 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             log.info("Sai ten dang nhap hoac mat khau");
             throw ex;
         }
-        UserPrincipal userPrincipal = (UserPrincipal) token.getPrincipal();
-        Employee employee = userPrincipal.getEmployee();
+        Employee employee = (Employee) token.getPrincipal();
         SecurityContextHolder.getContext().setAuthentication(token);
         
         statusLogRepository.findFirstByEmployee_UsernameOrderByTimestampDesc(employee.getUsername()).ifPresentOrElse(

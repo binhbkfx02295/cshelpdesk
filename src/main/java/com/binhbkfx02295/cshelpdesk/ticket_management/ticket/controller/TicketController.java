@@ -4,7 +4,7 @@ import com.binhbkfx02295.cshelpdesk.ticket_management.note.dto.NoteDTO;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.dto.*;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.entity.Ticket;
 import com.binhbkfx02295.cshelpdesk.ticket_management.ticket.service.TicketServiceImpl;
-import com.binhbkfx02295.cshelpdesk.authentication.dto.UserPrincipal;
+import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResponseEntityHelper;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.PaginationResponse;
@@ -83,7 +83,7 @@ public class TicketController {
 
     @GetMapping("/dashboard")
     public ResponseEntity<APIResultSet<List<TicketDashboardDTO>>> dashboard(
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+            @AuthenticationPrincipal Employee userPrincipal
             ) {
         return APIResponseEntityHelper.from(ticketService.getForDashboard(userPrincipal.getUsername()));
     }

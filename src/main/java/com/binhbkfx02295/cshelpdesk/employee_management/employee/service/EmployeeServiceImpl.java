@@ -1,6 +1,4 @@
 package com.binhbkfx02295.cshelpdesk.employee_management.employee.service;
-
-import com.binhbkfx02295.cshelpdesk.authentication.dto.UserPrincipal;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.*;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.EmployeeDetailDTO;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.mapper.StatusLogMapper;
@@ -267,15 +265,6 @@ public class EmployeeServiceImpl implements EmployeeService, UserDetailsService 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return employeeRepository.findWithUserGroupAndPermissionsByUsername(username)
-                .map(e -> new UserPrincipal(
-                        e.getUsername(),
-                        e.getName(),
-                        e.getDescription(),
-                        e.getUserGroup().getPermissions()
-                                .stream()
-                                .map(p -> new SimpleGrantedAuthority("ROLE_" + p.getName()))
-                                .toList(),
-                        e))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
