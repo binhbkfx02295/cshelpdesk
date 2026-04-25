@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.exc.StreamWriteException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/report/**",
                                                                 "/api/performance/**",
                                                                 "/api/setting/**")
-                                                .hasAuthority("SUPERVISOR")
+                                                .hasRole("SUPERVISOR")
                                                 
                                                 .requestMatchers("/api/**")
                                                 .authenticated()
@@ -82,6 +83,12 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .invalidSessionStrategy((request, response) -> {
                                                         log.info("Session invalid: " + request.getRequestURI());
+                                                        Cookie cookie = new Cookie("JSESSIONID", null);
+                                                        cookie.setPath("/");
+                                                        cookie.setHttpOnly(true);
+                                                        cookie.setMaxAge(0);
+                                                        response.addCookie(cookie);
+
                                                         writeJSON(objectMapper, response, APIResultSet
                                                                         .unauthorized("Session khong hop le"));
                                                 })

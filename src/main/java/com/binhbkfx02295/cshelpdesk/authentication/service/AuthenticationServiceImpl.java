@@ -6,6 +6,7 @@ import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginRequestDTO;
 import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginResponseDTO;
 import com.binhbkfx02295.cshelpdesk.authentication.util.ValidationHelper;
 import com.binhbkfx02295.cshelpdesk.authentication.util.ValidationResult;
+import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.EmployeeDTO;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.Employee;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.Status;
 import com.binhbkfx02295.cshelpdesk.employee_management.employee.entity.StatusLog;
@@ -120,5 +121,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ValidationResult validate(LoginRequestDTO request, Locale locale) {
         return validationHelper.validateLoginInput(request.getUsername(), request.getPassword(), locale);
+    }
+
+    @Override
+    public APIResultSet<EmployeeDTO> getCurrentUser(String username) {
+
+        return employeeRepository.findWithTop1StatusLog(username)
+            .map(employee -> APIResultSet.ok("OK", employeeMapper.toDTO(employee)))
+            .orElseGet(() -> APIResultSet.notFound("User not found"));
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +58,7 @@ public class Employee implements UserDetails{
         List<SimpleGrantedAuthority> authorities = new ArrayList<>(getUserGroup().getPermissions().stream()
                 .map(p -> new SimpleGrantedAuthority(p.getName()))
                 .toList());
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + getUserGroup().getName()));
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + getUserGroup().getCode().toUpperCase()));
         return authorities;
     }
 

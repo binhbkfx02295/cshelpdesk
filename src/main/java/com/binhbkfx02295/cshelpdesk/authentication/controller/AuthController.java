@@ -3,9 +3,11 @@ package com.binhbkfx02295.cshelpdesk.authentication.controller;
 import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginRequestDTO;
 import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginResponseDTO;
 import com.binhbkfx02295.cshelpdesk.authentication.service.AuthenticationService;
+import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.EmployeeDTO;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResponseEntityHelper;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,10 @@ public class AuthController {
     @GetMapping("/logout")
     public ResponseEntity<APIResultSet<Void>> logout() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
         if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
             UserDetails user = (UserDetails) authentication.getPrincipal();
             return APIResponseEntityHelper.from(authenticationService.logout(user.getUsername()));
@@ -43,4 +49,14 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<APIResultSet<EmployeeDTO>> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            UserDetails user = (UserDetails) authentication.getPrincipal();
+            return APIResponseEntityHelper.from(authenticationService.getCurrentUser(user.getUsername()));
+        } else {
+            return APIResponseEntityHelper.from(APIResultSet.ok("No user logged in", null));    
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.binhbkfx02295.cshelpdesk.authentication.service;
 
 import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginResponseDTO;
 import com.binhbkfx02295.cshelpdesk.authentication.util.ValidationResult;
+import com.binhbkfx02295.cshelpdesk.employee_management.employee.dto.EmployeeDTO;
 import com.binhbkfx02295.cshelpdesk.infrastructure.util.APIResultSet;
 import com.binhbkfx02295.cshelpdesk.authentication.dto.LoginRequestDTO;
 
@@ -31,4 +32,7 @@ public interface AuthenticationService {
      * @return ValidationResult
      */
     ValidationResult validate(LoginRequestDTO request, Locale locale);
+
+
+    APIResultSet<EmployeeDTO> getCurrentUser(String username);
 }
